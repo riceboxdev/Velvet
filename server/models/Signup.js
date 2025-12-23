@@ -1,4 +1,4 @@
-const { db } = require('../config/firebase');
+const { db } = require('../config/database');
 const { FieldValue } = require('firebase-admin/firestore');
 const { nanoid } = require('nanoid');
 const Waitlist = require('./Waitlist');

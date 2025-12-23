@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-const { auth } = require('../config/firebase');
+const { auth } = require('../config/database');
 
 /**
  * POST /api/auth/create-user
