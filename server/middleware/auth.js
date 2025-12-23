@@ -60,6 +60,48 @@ async function authenticateToken(req, res, next) {
 }
 
 /**
+ * Verify Firebase ID token ONLY (User doc optional)
+ * Used for /me and /create-user to handle auto-creation
+ */
+async function verifyToken(req, res, next) {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({
+            error: 'Authentication required',
+            message: 'Please provide a valid Bearer token'
+        });
+    }
+
+    const token = authHeader.substring(7);
+
+    try {
+        const decodedToken = await admin.auth().verifyIdToken(token);
+        const user = await User.findById(decodedToken.uid);
+
+        req.auth = decodedToken;
+        req.user = user; // May be null
+        next();
+    } catch (error) {
+        console.error('[Auth] Token verification failed:', error);
+
+        if (error.code === 'auth/id-token-expired') {
+            return res.status(401).json({
+                error: 'Token expired',
+                message: 'Your session has expired, please log in again'
+            });
+        }
+
+        return res.status(401).json({
+            error: 'Invalid token',
+            message: 'The provided token is invalid',
+            details: error.message,
+            code: error.code
+        });
+    }
+}
+
+/**
  * Authenticate API key (for external API access)
  * Used for public API endpoints like signup widget
  */
@@ -176,6 +218,8 @@ function validateWaitlistId(req, res, next) {
 
 module.exports = {
     authenticateToken,
+    verifyToken,
+    authenticateApiKey,
     authenticateApiKey,
     optionalAuth,
     validateWaitlistOwnership,

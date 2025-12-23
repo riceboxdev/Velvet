@@ -7,19 +7,19 @@ const User = require('../models/User');
  * POST /api/auth/create-user
  * Create user document after Firebase Auth signup (called from client)
  */
-const { authenticateToken } = require('../middleware/auth');
+const { authenticateToken, verifyToken } = require('../middleware/auth');
 
 /**
  * POST /api/auth/create-user
  * Create user document after Firebase Auth signup (called from client)
  */
-router.post('/create-user', authenticateToken, async (req, res) => {
+router.post('/create-user', verifyToken, async (req, res) => {
     try {
         const { name = '' } = req.body;
         const decodedToken = req.auth; // From middleware
 
         // Check if user already exists
-        let user = await User.findById(decodedToken.uid);
+        let user = req.user; // From middleware
 
         if (!user) {
             // Create new user document
@@ -45,11 +45,20 @@ router.post('/create-user', authenticateToken, async (req, res) => {
  * GET /api/auth/me
  * Get current user (requires auth)
  */
-router.get('/me', authenticateToken, async (req, res) => {
+router.get('/me', verifyToken, async (req, res) => {
     try {
-        // User is already attached by middleware
+        // User might be null if not created yet
         let user = req.user;
         const decodedToken = req.auth;
+
+        if (!user) {
+            // Auto-create user document if it doesn't exist
+            user = await User.create({
+                uid: decodedToken.uid,
+                email: decodedToken.email,
+                name: ''
+            });
+        }
 
         // Update last login
         await User.updateLastLogin(decodedToken.uid);
@@ -58,6 +67,7 @@ router.get('/me', authenticateToken, async (req, res) => {
             success: true,
             data: { user }
         });
+
     } catch (error) {
         console.error('[Auth] Get user error:', error);
         return res.status(500).json({ error: 'Internal server error' });
