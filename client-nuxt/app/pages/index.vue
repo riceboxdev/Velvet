@@ -1,9 +1,17 @@
 <script setup lang="ts">
-const user = useCurrentUser()
+import { useAuthStore } from '~/stores/auth'
 
-onMounted(() => {
+const authStore = useAuthStore()
+
+onMounted(async () => {
+  // Ensure auth is initialized
+  if (!authStore.initialized) {
+    // Wait for a brief moment for auth to initialize
+    await new Promise(resolve => setTimeout(resolve, 500))
+  }
+
   watchEffect(() => {
-    if (user.value) {
+    if (authStore.user) {
       navigateTo('/dashboard')
     } else {
       navigateTo('/auth')
