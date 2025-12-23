@@ -1,0 +1,853 @@
+{
+  "builtTestProducts" : [
+    {
+      "binaryPath" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetPackageTests.xctest/Contents/MacOS/VelvetPackageTests",
+      "packagePath" : "/Users/nickrogers/DEV/VELVET/ios-sdk",
+      "productName" : "VelvetPackageTests"
+    }
+  ],
+  "copyCommands" : {
+
+  },
+  "explicitTargetDependencyImportCheckingMode" : {
+    "none" : {
+
+    }
+  },
+  "generatedSourceTargetSet" : [
+
+  ],
+  "pluginDescriptions" : [
+
+  ],
+  "swiftCommands" : {
+    "C.Velvet-arm64-apple-macosx26.0-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/sources",
+      "importPath" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/API/WaitlistAPIClient.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Models/LeaderboardEntry.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Models/RegistrationCheck.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Models/WaitlistInfo.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Models/WaitlistSignup.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Protocols/WaitlistUIProvider.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Velvet.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/ViewModels/WaitlistViewModel.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Views/CustomWaitlistView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Views/LeaderboardView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Views/WaitlistStatusView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Views/WaitlistView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "Velvet",
+      "moduleOutputPath" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Modules/Velvet.swiftmodule",
+      "objects" : [
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistAPIClient.swift.o",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/LeaderboardEntry.swift.o",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/RegistrationCheck.swift.o",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistInfo.swift.o",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistSignup.swift.o",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistUIProvider.swift.o",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/Velvet.swift.o",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistViewModel.swift.o",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/CustomWaitlistView.swift.o",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/LeaderboardView.swift.o",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistStatusView.swift.o",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistView.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx12.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j12",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/include/Velvet-Swift.h",
+        "-color-diagnostics",
+        "-swift-version",
+        "5",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "ios_sdk"
+      ],
+      "outputFileMapPath" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistAPIClient.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/LeaderboardEntry.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/RegistrationCheck.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistInfo.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistSignup.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistUIProvider.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/Velvet.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistViewModel.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/CustomWaitlistView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/LeaderboardView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistStatusView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Modules/Velvet.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/API/WaitlistAPIClient.swift",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Models/LeaderboardEntry.swift",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Models/RegistrationCheck.swift",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Models/WaitlistInfo.swift",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Models/WaitlistSignup.swift",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Protocols/WaitlistUIProvider.swift",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Velvet.swift",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/ViewModels/WaitlistViewModel.swift",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Views/CustomWaitlistView.swift",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Views/LeaderboardView.swift",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Views/WaitlistStatusView.swift",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Views/WaitlistView.swift"
+      ],
+      "tempsPath" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.VelvetPackageTests-arm64-apple-macosx26.0-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetPackageTests.build/sources",
+      "importPath" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetPackageTests.derived/runner.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Modules/VelvetTests.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetPackageTests.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "VelvetPackageTests",
+      "moduleOutputPath" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Modules/VelvetPackageTests.swiftmodule",
+      "objects" : [
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetPackageTests.build/runner.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx12.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-Xfrontend",
+        "-enable-cross-import-overlays",
+        "-j12",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetPackageTests.build/include/VelvetPackageTests-Swift.h",
+        "-color-diagnostics",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "ios_sdk"
+      ],
+      "outputFileMapPath" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetPackageTests.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetPackageTests.build/runner.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Modules/VelvetPackageTests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetPackageTests.derived/runner.swift"
+      ],
+      "tempsPath" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetPackageTests.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.VelvetTests-arm64-apple-macosx26.0-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetTests.build/sources",
+      "importPath" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/Tests/VelvetTests/VelvetTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Modules/Velvet.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetTests.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "VelvetTests",
+      "moduleOutputPath" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Modules/VelvetTests.swiftmodule",
+      "objects" : [
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetTests.build/VelvetTests.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx14.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-Xfrontend",
+        "-enable-cross-import-overlays",
+        "-j12",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-color-diagnostics",
+        "-swift-version",
+        "5",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "ios_sdk"
+      ],
+      "outputFileMapPath" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetTests.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetTests.build/VelvetTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Modules/VelvetTests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/nickrogers/DEV/VELVET/ios-sdk/Tests/VelvetTests/VelvetTests.swift"
+      ],
+      "tempsPath" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetTests.build",
+      "wholeModuleOptimization" : false
+    }
+  },
+  "swiftFrontendCommands" : {
+
+  },
+  "swiftTargetScanArgs" : {
+    "Velvet" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "Velvet",
+      "-package-name",
+      "ios_sdk",
+      "-c",
+      "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/API/WaitlistAPIClient.swift",
+      "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Models/LeaderboardEntry.swift",
+      "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Models/RegistrationCheck.swift",
+      "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Models/WaitlistInfo.swift",
+      "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Models/WaitlistSignup.swift",
+      "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Protocols/WaitlistUIProvider.swift",
+      "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Velvet.swift",
+      "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/ViewModels/WaitlistViewModel.swift",
+      "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Views/CustomWaitlistView.swift",
+      "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Views/LeaderboardView.swift",
+      "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Views/WaitlistStatusView.swift",
+      "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Views/WaitlistView.swift",
+      "-I",
+      "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx12.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j12",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/include/Velvet-Swift.h",
+      "-color-diagnostics",
+      "-swift-version",
+      "5",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "ios_sdk",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "VelvetPackageTests" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "VelvetPackageTests",
+      "-package-name",
+      "ios_sdk",
+      "-c",
+      "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetPackageTests.derived/runner.swift",
+      "-I",
+      "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx12.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-Xfrontend",
+      "-enable-cross-import-overlays",
+      "-j12",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetPackageTests.build/include/VelvetPackageTests-Swift.h",
+      "-color-diagnostics",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "ios_sdk",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "VelvetTests" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "VelvetTests",
+      "-package-name",
+      "ios_sdk",
+      "-c",
+      "/Users/nickrogers/DEV/VELVET/ios-sdk/Tests/VelvetTests/VelvetTests.swift",
+      "-I",
+      "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx14.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-Xfrontend",
+      "-enable-cross-import-overlays",
+      "-j12",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-color-diagnostics",
+      "-swift-version",
+      "5",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "ios_sdk",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ]
+  },
+  "targetDependencyMap" : {
+    "Velvet" : [
+
+    ],
+    "VelvetPackageTests" : [
+      "VelvetTests",
+      "Velvet"
+    ],
+    "VelvetTests" : [
+      "Velvet"
+    ]
+  },
+  "testDiscoveryCommands" : {
+
+  },
+  "testEntryPointCommands" : {
+    "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetPackageTests.derived/runner.swift" : {
+      "inputs" : [
+
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetPackageTests.derived/runner.swift"
+        }
+      ]
+    }
+  },
+  "traitConfiguration" : {
+    "default" : {
+
+    }
+  },
+  "writeCommands" : {
+    "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/API/WaitlistAPIClient.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Models/LeaderboardEntry.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Models/RegistrationCheck.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Models/WaitlistInfo.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Models/WaitlistSignup.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Protocols/WaitlistUIProvider.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Velvet.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/ViewModels/WaitlistViewModel.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Views/CustomWaitlistView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Views/LeaderboardView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Views/WaitlistStatusView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Views/WaitlistView.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/sources"
+    },
+    "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetPackageTests.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetPackageTests.derived/runner.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetPackageTests.build/sources"
+    },
+    "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetPackageTests.product/Objects.LinkFileList" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<link-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/CustomWaitlistView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/LeaderboardEntry.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/LeaderboardView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/RegistrationCheck.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/Velvet.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistAPIClient.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistInfo.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistSignup.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistStatusView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistUIProvider.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistViewModel.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetPackageTests.build/runner.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetTests.build/VelvetTests.swift.o"
+        }
+      ],
+      "outputFilePath" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetPackageTests.product/Objects.LinkFileList"
+    },
+    "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetTests.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nickrogers/DEV/VELVET/ios-sdk/Tests/VelvetTests/VelvetTests.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetTests.build/sources"
+    },
+    "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt" : {
+      "alwaysOutOfDate" : true,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<swift-get-version>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+        }
+      ],
+      "outputFilePath" : "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+    }
+  }
+}

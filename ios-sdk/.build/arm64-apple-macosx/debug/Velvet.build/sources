@@ -1,0 +1,12 @@
+/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/API/WaitlistAPIClient.swift
+/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Models/LeaderboardEntry.swift
+/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Models/RegistrationCheck.swift
+/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Models/WaitlistInfo.swift
+/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Models/WaitlistSignup.swift
+/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Protocols/WaitlistUIProvider.swift
+/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Velvet.swift
+/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/ViewModels/WaitlistViewModel.swift
+/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Views/CustomWaitlistView.swift
+/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Views/LeaderboardView.swift
+/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Views/WaitlistStatusView.swift
+/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Views/WaitlistView.swift

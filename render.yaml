@@ -1,0 +1,31 @@
+services:
+  # Backend Service (Express + Firestore)
+  - type: web
+    name: velvet-backend
+    env: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node index.js
+    envVars:
+      - key: NODE_VERSION
+        value: 20.10.0
+      - key: FIREBASE_SERVICE_ACCOUNT
+        sync: false # Admin must provide this in Render Dashboard
+      - key: CORS_ORIGIN
+        value: "*" # Allow all for simplicity, or restrict to frontend URL later
+
+  # Frontend Service (Nuxt SPA)
+  - type: static
+    name: velvet-frontend
+    env: static
+    plan: free
+    rootDir: client-nuxt
+    buildCommand: npm install && npx nuxt generate
+    publishDir: .output/public
+    envVars:
+      - key: NUXT_PUBLIC_API_BASE
+        fromService:
+          type: web
+          name: velvet-backend
+          property: url

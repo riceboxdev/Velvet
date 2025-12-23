@@ -1,0 +1,35 @@
+{
+    "functions": {
+        "source": "functions",
+        "runtime": "nodejs20",
+        "ignore": [
+            "node_modules",
+            ".git",
+            "firebase-debug.log",
+            "firebase-debug.*.log",
+            "*.local"
+        ]
+    },
+    "hosting": {
+        "public": "client-nuxt/.output/public",
+        "ignore": [
+            "firebase.json",
+            "**/.*",
+            "**/node_modules/**"
+        ],
+        "rewrites": [
+            {
+                "source": "/api/**",
+                "function": "backend"
+            },
+            {
+                "source": "**",
+                "destination": "/index.html"
+            }
+        ]
+    },
+    "firestore": {
+        "rules": "firestore.rules",
+        "indexes": "firestore.indexes.json"
+    }
+}

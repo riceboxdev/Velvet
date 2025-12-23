@@ -1,0 +1,89 @@
+{
+  "": {
+    "swift-dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/master.swiftdeps"
+  },
+  "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/API/WaitlistAPIClient.swift": {
+    "dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistAPIClient.d",
+    "object": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistAPIClient.swift.o",
+    "swiftmodule": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistAPIClient~partial.swiftmodule",
+    "swift-dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistAPIClient.swiftdeps",
+    "diagnostics": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistAPIClient.dia"
+  },
+  "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Models/LeaderboardEntry.swift": {
+    "dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/LeaderboardEntry.d",
+    "object": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/LeaderboardEntry.swift.o",
+    "swiftmodule": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/LeaderboardEntry~partial.swiftmodule",
+    "swift-dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/LeaderboardEntry.swiftdeps",
+    "diagnostics": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/LeaderboardEntry.dia"
+  },
+  "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Models/RegistrationCheck.swift": {
+    "dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/RegistrationCheck.d",
+    "object": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/RegistrationCheck.swift.o",
+    "swiftmodule": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/RegistrationCheck~partial.swiftmodule",
+    "swift-dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/RegistrationCheck.swiftdeps",
+    "diagnostics": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/RegistrationCheck.dia"
+  },
+  "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Models/WaitlistInfo.swift": {
+    "dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistInfo.d",
+    "object": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistInfo.swift.o",
+    "swiftmodule": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistInfo~partial.swiftmodule",
+    "swift-dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistInfo.swiftdeps",
+    "diagnostics": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistInfo.dia"
+  },
+  "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Models/WaitlistSignup.swift": {
+    "dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistSignup.d",
+    "object": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistSignup.swift.o",
+    "swiftmodule": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistSignup~partial.swiftmodule",
+    "swift-dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistSignup.swiftdeps",
+    "diagnostics": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistSignup.dia"
+  },
+  "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Protocols/WaitlistUIProvider.swift": {
+    "dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistUIProvider.d",
+    "object": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistUIProvider.swift.o",
+    "swiftmodule": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistUIProvider~partial.swiftmodule",
+    "swift-dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistUIProvider.swiftdeps",
+    "diagnostics": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistUIProvider.dia"
+  },
+  "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Velvet.swift": {
+    "dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/Velvet.d",
+    "object": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/Velvet.swift.o",
+    "swiftmodule": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/Velvet~partial.swiftmodule",
+    "swift-dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/Velvet.swiftdeps",
+    "diagnostics": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/Velvet.dia"
+  },
+  "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/ViewModels/WaitlistViewModel.swift": {
+    "dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistViewModel.d",
+    "object": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistViewModel.swift.o",
+    "swiftmodule": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistViewModel~partial.swiftmodule",
+    "swift-dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistViewModel.swiftdeps",
+    "diagnostics": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistViewModel.dia"
+  },
+  "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Views/CustomWaitlistView.swift": {
+    "dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/CustomWaitlistView.d",
+    "object": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/CustomWaitlistView.swift.o",
+    "swiftmodule": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/CustomWaitlistView~partial.swiftmodule",
+    "swift-dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/CustomWaitlistView.swiftdeps",
+    "diagnostics": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/CustomWaitlistView.dia"
+  },
+  "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Views/LeaderboardView.swift": {
+    "dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/LeaderboardView.d",
+    "object": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/LeaderboardView.swift.o",
+    "swiftmodule": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/LeaderboardView~partial.swiftmodule",
+    "swift-dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/LeaderboardView.swiftdeps",
+    "diagnostics": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/LeaderboardView.dia"
+  },
+  "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Views/WaitlistStatusView.swift": {
+    "dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistStatusView.d",
+    "object": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistStatusView.swift.o",
+    "swiftmodule": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistStatusView~partial.swiftmodule",
+    "swift-dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistStatusView.swiftdeps",
+    "diagnostics": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistStatusView.dia"
+  },
+  "/Users/nickrogers/DEV/VELVET/ios-sdk/Sources/Velvet/Views/WaitlistView.swift": {
+    "dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistView.d",
+    "object": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistView.swift.o",
+    "swiftmodule": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistView~partial.swiftmodule",
+    "swift-dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistView.swiftdeps",
+    "diagnostics": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/WaitlistView.dia"
+  }
+}

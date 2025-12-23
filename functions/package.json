@@ -1,0 +1,29 @@
+{
+    "name": "velvet-functions",
+    "version": "1.0.0",
+    "description": "Velvet API Cloud Functions",
+    "main": "index.js",
+    "type": "commonjs",
+    "engines": {
+        "node": "20"
+    },
+    "scripts": {
+        "serve": "firebase emulators:start --only functions",
+        "shell": "firebase functions:shell",
+        "start": "npm run shell",
+        "deploy": "firebase deploy --only functions",
+        "logs": "firebase functions:log"
+    },
+    "dependencies": {
+        "cors": "^2.8.5",
+        "express": "^5.2.1",
+        "firebase-admin": "^13.0.2",
+        "firebase-functions": "^6.5.0",
+        "nanoid": "^3.3.11",
+        "nodemailer": "^7.0.12"
+    },
+    "devDependencies": {
+        "firebase-functions-test": "^3.4.0"
+    },
+    "private": true
+}

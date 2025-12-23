@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetTests.build/master.swiftdeps"
+  },
+  "/Users/nickrogers/DEV/VELVET/ios-sdk/Tests/VelvetTests/VelvetTests.swift": {
+    "dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetTests.build/VelvetTests.d",
+    "object": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetTests.build/VelvetTests.swift.o",
+    "swiftmodule": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetTests.build/VelvetTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetTests.build/VelvetTests.swiftdeps",
+    "diagnostics": "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/VelvetTests.build/VelvetTests.dia"
+  }
+}

@@ -1,0 +1,3 @@
+module Velvet {
+    header "/Users/nickrogers/DEV/VELVET/ios-sdk/.build/arm64-apple-macosx/debug/Velvet.build/include/Velvet-Swift.h"
+}

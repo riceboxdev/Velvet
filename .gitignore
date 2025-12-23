@@ -45,6 +45,7 @@ playground.xcworkspace
 # Xcode automatically generates this directory with a .xcworkspacedata file and xcuserdata
 # hence it is not needed unless you have added a package configuration file to your project
 # .swiftpm
+#
 
 .build/
 
@@ -95,4 +96,32 @@ iOSInjectionProject/
 # Swift Package Manager
 .swiftpm/
 .netrc
+
+# Dependencies
+node_modules
+.pnpm-store
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Build Outputs
+.output
+.nuxt
+dist
+
+# System
+*.log
+npm-debug.log*
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Firebase
+.firebase
+firebase-debug.log
 
