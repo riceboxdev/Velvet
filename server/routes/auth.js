@@ -1,24 +1,22 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-const { auth } = require('../config/database');
+
 
 /**
  * POST /api/auth/create-user
  * Create user document after Firebase Auth signup (called from client)
  */
-router.post('/create-user', async (req, res) => {
-    const authHeader = req.headers.authorization;
+const { authenticateToken } = require('../middleware/auth');
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'No token provided' });
-    }
-
-    const idToken = authHeader.substring(7);
-
+/**
+ * POST /api/auth/create-user
+ * Create user document after Firebase Auth signup (called from client)
+ */
+router.post('/create-user', authenticateToken, async (req, res) => {
     try {
-        const decodedToken = await auth.verifyIdToken(idToken);
         const { name = '' } = req.body;
+        const decodedToken = req.auth; // From middleware
 
         // Check if user already exists
         let user = await User.findById(decodedToken.uid);
@@ -47,27 +45,11 @@ router.post('/create-user', async (req, res) => {
  * GET /api/auth/me
  * Get current user (requires auth)
  */
-router.get('/me', async (req, res) => {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'No token provided' });
-    }
-
-    const idToken = authHeader.substring(7);
-
+router.get('/me', authenticateToken, async (req, res) => {
     try {
-        const decodedToken = await auth.verifyIdToken(idToken);
-        let user = await User.findById(decodedToken.uid);
-
-        if (!user) {
-            // Auto-create user document if it doesn't exist
-            user = await User.create({
-                uid: decodedToken.uid,
-                email: decodedToken.email,
-                name: ''
-            });
-        }
+        // User is already attached by middleware
+        let user = req.user;
+        const decodedToken = req.auth;
 
         // Update last login
         await User.updateLastLogin(decodedToken.uid);
@@ -78,7 +60,7 @@ router.get('/me', async (req, res) => {
         });
     } catch (error) {
         console.error('[Auth] Get user error:', error);
-        return res.status(401).json({ error: 'Invalid token' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 });
 
@@ -86,18 +68,10 @@ router.get('/me', async (req, res) => {
  * PUT /api/auth/profile
  * Update user profile
  */
-router.put('/profile', async (req, res) => {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'No token provided' });
-    }
-
-    const idToken = authHeader.substring(7);
-
+router.put('/profile', authenticateToken, async (req, res) => {
     try {
-        const decodedToken = await auth.verifyIdToken(idToken);
         const { name, email } = req.body;
+        const decodedToken = req.auth;
 
         const user = await User.update(decodedToken.uid, { name, email });
 
