@@ -210,8 +210,8 @@ export const useAuthStore = defineStore('auth', () => {
 
     // Initialize on client
     if (import.meta.client) {
-        // Delay initialization until Firebase plugin is ready
-        setTimeout(() => initAuth(), 0)
+        // Initialize auth immediately when store is created
+        initAuth()
     }
 
     return {

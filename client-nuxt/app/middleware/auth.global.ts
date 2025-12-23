@@ -4,6 +4,16 @@ export default defineNuxtRouteMiddleware(async (to) => {
     // Initialize auth state if not already done
     if (!authStore.initialized) {
         authStore.initAuth()
+
+        // Wait for auth to initialize (max 5 seconds)
+        const maxWait = 5000
+        const checkInterval = 50
+        let waited = 0
+
+        while (!authStore.initialized && waited < maxWait) {
+            await new Promise(resolve => setTimeout(resolve, checkInterval))
+            waited += checkInterval
+        }
     }
 
     // Public routes that don't require authentication
