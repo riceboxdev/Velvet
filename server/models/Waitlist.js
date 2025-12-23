@@ -57,10 +57,16 @@ class Waitlist {
     static async findByUserId(userId) {
         const snapshot = await db.collection(COLLECTION)
             .where('user_id', '==', userId)
-            .orderBy('created_at', 'desc')
             .get();
 
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const waitlists = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // Sort in memory to avoid composite index requirement
+        return waitlists.sort((a, b) => {
+            const dateA = a.created_at?.toDate ? a.created_at.toDate() : new Date(0);
+            const dateB = b.created_at?.toDate ? b.created_at.toDate() : new Date(0);
+            return dateB - dateA;
+        });
     }
 
     /**
