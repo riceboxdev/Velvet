@@ -130,6 +130,41 @@ class Subscription {
         const plan = await this.findPlanById(subscription.plan_id);
         return { ...subscription, plan };
     }
+
+    // ==================== ALIASES & HELPERS ====================
+
+    static async getPlanById(id) {
+        return this.findPlanById(id);
+    }
+
+    static async findByUserId(userId) {
+        return this.findActiveByUserId(userId);
+    }
+
+    static async getUserLimits(userId) {
+        const subscription = await this.getUserSubscription(userId);
+
+        if (!subscription) {
+            // Default Free Tier Limits
+            return {
+                max_waitlists: 1,
+                max_signups_per_month: 100,
+                max_team_members: 1,
+                features: [],
+                plan_name: 'Free',
+                has_subscription: false
+            };
+        }
+
+        return {
+            max_waitlists: subscription.plan.max_waitlists,
+            max_signups_per_month: subscription.plan.max_signups_per_month,
+            max_team_members: subscription.plan.max_team_members,
+            features: subscription.plan.features,
+            plan_name: subscription.plan.name,
+            has_subscription: true
+        };
+    }
 }
 
 module.exports = Subscription;
