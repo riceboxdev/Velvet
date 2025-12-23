@@ -16,13 +16,13 @@ services:
         value: "*" # Allow all for simplicity, or restrict to frontend URL later
 
   # Frontend Service (Nuxt SPA)
-  - type: static
+  - type: web
     name: velvet-frontend
     env: static
     plan: free
     rootDir: client-nuxt
     buildCommand: npm install && npx nuxt generate
-    publishDir: .output/public
+    staticPublishPath: .output/public
     envVars:
       - key: NUXT_PUBLIC_API_BASE
         fromService:
