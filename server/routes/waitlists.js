@@ -28,7 +28,11 @@ router.get('/', async (req, res) => {
         });
     } catch (error) {
         console.error('[Waitlists] Get all error:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({
+            error: 'Internal server error',
+            details: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 });
 
