@@ -10,7 +10,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || (process.env.NUXT_PUBLIC_API_HOST ? `https://${process.env.NUXT_PUBLIC_API_HOST}` : 'http://localhost:5001/YOUR_PROJECT_ID/us-central1/api'),
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || (process.env.NUXT_PUBLIC_API_HOST ? `https://${process.env.NUXT_PUBLIC_API_HOST}/api` : 'http://localhost:5001/YOUR_PROJECT_ID/us-central1/api'),
       firebaseApiKey: process.env.NUXT_PUBLIC_FIREBASE_API_KEY || '',
       firebaseAuthDomain: process.env.NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN || '',
       firebaseProjectId: process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID || '',

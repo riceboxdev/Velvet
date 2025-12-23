@@ -25,10 +25,7 @@ services:
     startCommand: npx serve .output/public -s -p $PORT
     envVars:
       - key: NUXT_PUBLIC_API_HOST
-        fromService:
-          type: web
-          name: velvet-backend
-          property: host
+        sync: false
       - key: NUXT_PUBLIC_FIREBASE_API_KEY
         sync: false
       - key: NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN
