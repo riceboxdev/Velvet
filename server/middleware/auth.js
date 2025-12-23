@@ -52,7 +52,9 @@ async function authenticateToken(req, res, next) {
 
         return res.status(401).json({
             error: 'Invalid token',
-            message: 'The provided token is invalid'
+            message: 'The provided token is invalid',
+            details: error.message,
+            code: error.code
         });
     }
 }
