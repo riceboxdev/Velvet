@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Xcode
 #
 # gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
@@ -97,6 +98,8 @@ iOSInjectionProject/
 .swiftpm/
 .netrc
 
+=======
+>>>>>>> 26fcee0 (Refactor for Render deployment: Firestore backend + Static Nuxt frontend)
 # Dependencies
 node_modules
 .pnpm-store
@@ -110,8 +113,15 @@ node_modules
 .output
 .nuxt
 dist
+<<<<<<< HEAD
 
 # System
+=======
+build
+
+# System
+.DS_Store
+>>>>>>> 26fcee0 (Refactor for Render deployment: Firestore backend + Static Nuxt frontend)
 *.log
 npm-debug.log*
 
@@ -124,4 +134,7 @@ npm-debug.log*
 # Firebase
 .firebase
 firebase-debug.log
+<<<<<<< HEAD
 
+=======
+>>>>>>> 26fcee0 (Refactor for Render deployment: Firestore backend + Static Nuxt frontend)
