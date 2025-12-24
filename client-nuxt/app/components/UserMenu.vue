@@ -19,6 +19,7 @@ const neutrals = ['slate', 'gray', 'zinc', 'neutral', 'stone']
 const userDisplay = computed(() => ({
   name: authStore.user?.name || authStore.user?.email || 'User',
   avatar: {
+    src: authStore.user?.photo_url || undefined,
     text: (authStore.user?.name?.[0] || authStore.user?.email?.[0] || 'U').toUpperCase(),
     alt: authStore.user?.name || authStore.user?.email || 'User'
   }
