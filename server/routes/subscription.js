@@ -382,8 +382,9 @@ router.get('/test/plans', async (req, res) => {
 /**
  * POST /api/subscription/test/seed-plans
  * Seed initial plans into database (one-time setup)
+ * No auth required - safe because it only creates plans if they don't exist
  */
-router.post('/test/seed-plans', authenticateToken, async (req, res) => {
+router.post('/test/seed-plans', async (req, res) => {
     try {
         const plans = [
             {
