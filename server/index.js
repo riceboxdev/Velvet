@@ -72,8 +72,8 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-    console.log(`\n🚀 Waitlist API server running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`\n🚀 Waitlist API server running on http://0.0.0.0:${PORT}`);
     console.log('[Firebase] Backend using Firestore');
 });
 
