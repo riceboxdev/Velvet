@@ -16,14 +16,28 @@ onMounted(() => {
   }
 })
 
+const toast = useToast()
+
 async function saveChanges() {
   saving.value = true
   try {
-    // TODO: Implement account update API
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    // Show success toast
+    await authStore.updateProfile({
+      name: form.value.name
+    })
+    toast.add({
+      title: 'Settings saved',
+      description: 'Your account settings have been updated.',
+      color: 'success',
+      icon: 'i-lucide-check-circle'
+    })
   } catch (e: any) {
     console.error('Failed to save:', e)
+    toast.add({
+      title: 'Error saving settings',
+      description: e.message || 'Something went wrong. Please try again.',
+      color: 'error',
+      icon: 'i-lucide-alert-circle'
+    })
   } finally {
     saving.value = false
   }
