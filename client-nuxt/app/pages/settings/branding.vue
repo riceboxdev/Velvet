@@ -17,13 +17,17 @@ const branding = ref({
 })
 
 onMounted(async () => {
-  if (store.hasApiKey) {
+  // First, ensure we have waitlists loaded
+  if (!store.hasWaitlists) {
+    await store.fetchAllWaitlists()
+  }
+  
+  // Now fetch the current waitlist details
+  if (store.currentWaitlist?.id) {
     await store.fetchWaitlist()
-    if (store.currentWaitlist) {
-      const settings = (store.currentWaitlist as any)?.settings || {}
-      if (settings.branding) {
-        branding.value = { ...branding.value, ...settings.branding }
-      }
+    const settings = (store.currentWaitlist as any)?.settings || {}
+    if (settings.branding) {
+      branding.value = { ...branding.value, ...settings.branding }
     }
   }
 })
