@@ -590,35 +590,33 @@ const testPlanOptions = computed(() => {
 
     <!-- Plan Selection Modal -->
     <UModal v-model:open="showPlanModal">
-      <UCard v-if="selectedPlan">
-        <template #header>
-          <h3 class="font-semibold text-lg">Upgrade to {{ selectedPlan.name }}</h3>
-        </template>
+      <template #content>
+        <div v-if="selectedPlan" class="p-6 bg-[var(--ui-bg)] text-[var(--ui-text)]">
+          <h3 class="font-semibold text-lg mb-4">Upgrade to {{ selectedPlan.name }}</h3>
 
-        <div class="space-y-4">
-          <div class="flex items-center justify-between">
-            <span>Plan</span>
-            <span class="font-semibold">{{ selectedPlan.name }}</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <span>Billing</span>
-            <span class="font-semibold capitalize">{{ billingCycle }}</span>
-          </div>
-          <div class="flex items-center justify-between border-t pt-4">
-            <span class="font-semibold">Total</span>
-            <div class="text-right">
-              <div class="text-2xl font-bold">
-                ${{ billingCycle === 'annual' ? selectedPlan.annualPrice : selectedPlan.monthlyPrice }}
-              </div>
-              <div class="text-xs text-dimmed">
-                {{ billingCycle === 'annual' ? 'per year' : 'per month' }}
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-[var(--ui-text-muted)]">Plan</span>
+              <span class="font-semibold">{{ selectedPlan.name }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-[var(--ui-text-muted)]">Billing</span>
+              <span class="font-semibold capitalize">{{ billingCycle }}</span>
+            </div>
+            <div class="flex items-center justify-between border-t border-[var(--ui-border)] pt-4">
+              <span class="font-semibold">Total</span>
+              <div class="text-right">
+                <div class="text-2xl font-bold">
+                  ${{ billingCycle === 'annual' ? selectedPlan.annualPrice : selectedPlan.monthlyPrice }}
+                </div>
+                <div class="text-xs text-[var(--ui-text-muted)]">
+                  {{ billingCycle === 'annual' ? 'per year' : 'per month' }}
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <template #footer>
-          <div class="flex justify-end gap-3">
+          <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-[var(--ui-border)]">
             <UButton color="neutral" variant="outline" @click="showPlanModal = false">
               Cancel
             </UButton>
@@ -630,8 +628,8 @@ const testPlanOptions = computed(() => {
               Continue to Checkout
             </UButton>
           </div>
-        </template>
-      </UCard>
+        </div>
+      </template>
     </UModal>
   </div>
 </template>
