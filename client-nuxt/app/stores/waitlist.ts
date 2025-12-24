@@ -236,16 +236,22 @@ export const useWaitlistStore = defineStore('waitlist', () => {
     }
 
     async function updateWaitlistSettings(updates: Record<string, any>) {
-        if (!currentWaitlist.value?.id) return null
+        console.log('[Store] updateWaitlistSettings called', { waitlistId: currentWaitlist.value?.id, updates })
+        if (!currentWaitlist.value?.id) {
+            console.error('[Store] No current waitlist ID!')
+            return null
+        }
 
         try {
             const headers = await getAuthHeaders()
+            console.log('[Store] Making PUT request to:', `${getApiBase()}/waitlists/${currentWaitlist.value.id}`)
             const res = await fetch(`${getApiBase()}/waitlists/${currentWaitlist.value.id}`, {
                 method: 'PUT',
                 headers,
                 body: JSON.stringify(updates)
             })
 
+            console.log('[Store] Response status:', res.status)
             if (!res.ok) throw new Error('Failed to update waitlist')
 
             const data = await res.json()
