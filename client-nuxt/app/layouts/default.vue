@@ -79,6 +79,18 @@ const links = computed<NavigationMenuItem[][]>(() => {
         open.value = false
       }
     }, {
+      label: 'Signup Form',
+      to: '/settings/signup-form',
+      onSelect: () => {
+        open.value = false
+      }
+    }, {
+      label: 'Domains',
+      to: '/settings/domains',
+      onSelect: () => {
+        open.value = false
+      }
+    }, {
       label: 'Branding',
       to: '/settings/branding',
       onSelect: () => {
@@ -102,7 +114,13 @@ const links = computed<NavigationMenuItem[][]>(() => {
       onSelect: () => {
         open.value = false
       }
-    }] : [])]
+    }] : []), {
+      label: 'Danger Zone',
+      to: '/settings/danger',
+      onSelect: () => {
+        open.value = false
+      }
+    }]
   }]
 
   const footerLinks: NavigationMenuItem[] = [{
