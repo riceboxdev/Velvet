@@ -212,14 +212,38 @@ class Waitlist {
         const allowedFields = ['name', 'description', 'settings', 'is_active'];
         const updateData = { updated_at: FieldValue.serverTimestamp() };
 
+        // Get existing waitlist to merge settings
+        const existing = await this.findById(id);
+        if (!existing) return null;
+
         for (const [key, value] of Object.entries(updates)) {
             if (allowedFields.includes(key)) {
-                updateData[key] = value;
+                if (key === 'settings' && value && existing.settings) {
+                    // Deep merge settings to preserve existing values
+                    updateData[key] = this.deepMerge(existing.settings, value);
+                } else {
+                    updateData[key] = value;
+                }
             }
         }
 
         await db.collection(COLLECTION).doc(id).update(updateData);
         return this.findById(id);
+    }
+
+    /**
+     * Deep merge helper for settings objects
+     */
+    static deepMerge(target, source) {
+        const result = { ...target };
+        for (const key of Object.keys(source)) {
+            if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+                result[key] = this.deepMerge(target[key] || {}, source[key]);
+            } else {
+                result[key] = source[key];
+            }
+        }
+        return result;
     }
 
     /**
