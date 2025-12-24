@@ -22,9 +22,74 @@ interface Waitlist {
     id: string
     name: string
     description?: string
-    settings?: Record<string, any>
+    settings?: WaitlistSettings
     stats?: WaitlistStats
     created_at: string
+}
+
+interface WidgetSettings {
+    submitButtonColor: string
+    backgroundColor: string
+    fontColor: string
+    buttonFontColor: string
+    borderColor: string
+    darkMode: boolean
+    transparent: boolean
+    title: string
+    successTitle: string
+    successDescription: string
+    signupButtonText: string
+    removeLabels: boolean
+    emailPlaceholder: string
+    showBranding: boolean
+    logoUrl: string | null
+    bannerImageUrl: string | null
+}
+
+interface SocialSettings {
+    sharingMessage: string
+    enabledPlatforms: string[]
+    ogTitle: string
+    ogDescription: string
+    ogImage: string | null
+    socialLinks: {
+        twitter: string
+        facebook: string
+        instagram: string
+        linkedin: string
+        pinterest: string
+    }
+    showSocialLinksOnWidget: boolean
+}
+
+interface QuestionItem {
+    id: string
+    question: string
+    answers: string
+    optional: boolean
+}
+
+interface QuestionsSettings {
+    hideHeader: boolean
+    items: QuestionItem[]
+}
+
+interface WaitlistSettings {
+    // General
+    spotsSkippedOnReferral?: number
+    hideSignupCount?: boolean
+    hideTotalCount?: boolean
+    rankByReferrals?: boolean
+    closed?: boolean
+    enableCaptcha?: boolean
+    hideReferralLink?: boolean
+    allowSignupDataUpdate?: boolean
+    showLeaderboard?: boolean
+    leaderboardSize?: number
+    // Widget customization
+    widget?: WidgetSettings
+    social?: SocialSettings
+    questions?: QuestionsSettings
 }
 
 export const useWaitlistStore = defineStore('waitlist', () => {

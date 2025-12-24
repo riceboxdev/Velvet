@@ -45,7 +45,50 @@ const DEFAULT_SETTINGS = {
 
     // Leaderboard
     showLeaderboard: true,
-    leaderboardSize: 5
+    leaderboardSize: 5,
+
+    // Widget Design Settings
+    widget: {
+        submitButtonColor: '#1400ff',
+        backgroundColor: '#f4f4f4',
+        fontColor: '#000000',
+        buttonFontColor: '#ffffff',
+        borderColor: '#cccccc',
+        darkMode: false,
+        transparent: false,
+        title: '',  // Empty = use waitlist name
+        successTitle: '',  // Empty = use default
+        successDescription: '',
+        signupButtonText: 'Sign Up',
+        removeLabels: false,
+        emailPlaceholder: 'example@getwaitlist.com',
+        showBranding: true,
+        logoUrl: null,
+        bannerImageUrl: null
+    },
+
+    // Social Sharing Settings
+    social: {
+        sharingMessage: "I'm {priority} on {waitlist_name} 🔗 {referral_link}",
+        enabledPlatforms: ['twitter', 'whatsapp'],
+        ogTitle: 'Join the waitlist',
+        ogDescription: 'Join the waitlist to be the first to know when we launch!',
+        ogImage: null,
+        socialLinks: {
+            twitter: '',
+            facebook: '',
+            instagram: '',
+            linkedin: '',
+            pinterest: ''
+        },
+        showSocialLinksOnWidget: false
+    },
+
+    // Custom Questions Settings
+    questions: {
+        hideHeader: false,
+        items: []  // Array of { id, question, answers, optional }
+    }
 };
 
 // Common free email domains to block when blockFreeEmails is enabled
