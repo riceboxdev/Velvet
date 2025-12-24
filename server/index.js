@@ -44,6 +44,9 @@ const waitlistRoutes = require('./routes/waitlist');
 const signupRoutes = require('./routes/signup');
 const settingsRoutes = require('./routes/settings');
 const zapierRoutes = require('./routes/zapier');
+const subscriptionRoutes = require('./routes/subscription');
+const stripeRoutes = require('./routes/stripe');
+const userRoutes = require('./routes/user');
 
 // Mount routes
 app.use('/api/auth', authRoutes);
@@ -53,6 +56,9 @@ app.use('/api/signups', signupRoutes);
 app.use('/api/signup', signupRoutes); // Public signup endpoint
 app.use('/api/settings', settingsRoutes);
 app.use('/api/zapier', zapierRoutes);
+app.use('/api/subscription', subscriptionRoutes);
+app.use('/api/stripe', stripeRoutes);
+app.use('/api/user', userRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

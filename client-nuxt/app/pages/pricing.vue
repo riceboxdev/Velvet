@@ -16,6 +16,7 @@ interface Plan {
   features: string[]
   isPopular: boolean
   isEnterprise: boolean
+  isFree: boolean
 }
 
 const router = useRouter()
@@ -39,6 +40,11 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+// Separate paid plans from free tier
+const paidPlans = computed(() => plans.value.filter(p => !p.isFree && !p.isEnterprise))
+const freePlan = computed(() => plans.value.find(p => p.isFree))
+const enterprisePlan = computed(() => plans.value.find(p => p.isEnterprise))
 
 // Feature labels
 const FEATURE_LABELS: Record<string, string> = {
@@ -206,10 +212,10 @@ const faqs = [
       <UIcon name="i-lucide-loader-2" class="size-8 animate-spin text-primary" />
     </div>
 
-    <!-- Pricing Cards -->
-    <div v-else class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-16">
+    <!-- Pricing Cards (Paid Plans) -->
+    <div v-else class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-8">
       <UCard
-        v-for="plan in plans"
+        v-for="plan in paidPlans"
         :key="plan.id"
         :ui="{
           root: plan.isPopular ? 'ring-2 ring-primary relative' : '',
@@ -301,6 +307,84 @@ const faqs = [
         >
           {{ plan.isEnterprise ? 'Contact Sales' : 'Get Started' }}
         </UButton>
+      </UCard>
+    </div>
+
+    <!-- Free Tier -->
+    <div v-if="freePlan && !loading" class="mb-8">
+      <UCard :ui="{ body: 'p-6' }">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div class="flex-1">
+            <div class="flex items-center gap-3 mb-2">
+              <h3 class="text-xl font-bold">{{ freePlan.name }}</h3>
+              <UBadge color="neutral" variant="subtle">Forever Free</UBadge>
+            </div>
+            <p class="text-dimmed mb-4">{{ freePlan.description }}</p>
+            <div class="flex flex-wrap gap-4 text-sm">
+              <div class="flex items-center gap-2">
+                <UIcon name="i-lucide-check" class="text-success" />
+                <span>{{ freePlan.maxWaitlists }} waitlist</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <UIcon name="i-lucide-check" class="text-success" />
+                <span>{{ formatNumber(freePlan.maxSignupsPerMonth) }} signups/month</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <UIcon name="i-lucide-check" class="text-success" />
+                <span>Custom branding</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <UIcon name="i-lucide-check" class="text-success" />
+                <span>CSV export</span>
+              </div>
+            </div>
+          </div>
+          <div class="text-center md:text-right">
+            <div class="text-3xl font-bold mb-2">$0</div>
+            <UButton color="neutral" variant="outline" size="lg" @click="handleSelect(freePlan)">
+              Start Free
+            </UButton>
+          </div>
+        </div>
+      </UCard>
+    </div>
+
+    <!-- Enterprise -->
+    <div v-if="enterprisePlan && !loading" class="mb-16">
+      <UCard :ui="{ body: 'p-6' }" class="bg-gradient-to-r from-zinc-900 to-zinc-800 border-zinc-700">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div class="flex-1 text-white">
+            <div class="flex items-center gap-3 mb-2">
+              <h3 class="text-xl font-bold">{{ enterprisePlan.name }}</h3>
+              <UBadge color="primary" variant="solid">Custom</UBadge>
+            </div>
+            <p class="text-zinc-300 mb-4">{{ enterprisePlan.description }}</p>
+            <div class="flex flex-wrap gap-4 text-sm text-zinc-300">
+              <div class="flex items-center gap-2">
+                <UIcon name="i-lucide-check" class="text-primary" />
+                <span>Unlimited everything</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <UIcon name="i-lucide-check" class="text-primary" />
+                <span>SSO / SAML</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <UIcon name="i-lucide-check" class="text-primary" />
+                <span>Dedicated support</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <UIcon name="i-lucide-check" class="text-primary" />
+                <span>Custom SLA</span>
+              </div>
+            </div>
+          </div>
+          <div class="text-center md:text-right">
+            <div class="text-2xl font-bold text-white mb-2">Custom Pricing</div>
+            <UButton color="primary" size="lg" @click="handleSelect(enterprisePlan)">
+              Contact Sales
+            </UButton>
+          </div>
+        </div>
       </UCard>
     </div>
 

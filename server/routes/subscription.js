@@ -7,24 +7,25 @@ const { authenticateToken } = require('../middleware/auth');
  * GET /api/subscription/plans
  * Get all available subscription plans (public)
  */
-router.get('/plans', (req, res) => {
+router.get('/plans', async (req, res) => {
     try {
-        const plans = Subscription.getAllPlans();
+        const plans = await Subscription.getAllPlans();
 
         // Format for frontend display
         const formattedPlans = plans.map(plan => ({
             id: plan.id,
             name: plan.name,
             description: plan.description,
-            monthlyPrice: plan.monthly_price_display,
-            annualPrice: plan.annual_price_display,
-            annualMonthlyPrice: plan.annual_monthly_price,
+            monthlyPrice: plan.monthly_price,
+            annualPrice: plan.annual_price,
+            annualMonthlyPrice: plan.annual_price ? Math.round(plan.annual_price / 12) : 0,
             maxWaitlists: plan.max_waitlists,
             maxSignupsPerMonth: plan.max_signups_per_month,
             maxTeamMembers: plan.max_team_members,
-            features: plan.features,
-            isPopular: plan.id === 'growth', // Mark Growth as popular
-            isEnterprise: plan.id === 'enterprise'
+            features: plan.features || [],
+            isPopular: plan.name === 'Advanced', // Mark Advanced as popular
+            isEnterprise: plan.is_enterprise || plan.name === 'Enterprise',
+            isFree: plan.name === 'Free'
         }));
 
         res.json(formattedPlans);
@@ -38,20 +39,20 @@ router.get('/plans', (req, res) => {
  * GET /api/subscription/current
  * Get current user's subscription
  */
-router.get('/current', authenticateToken, (req, res) => {
+router.get('/current', authenticateToken, async (req, res) => {
     try {
-        const subscription = Subscription.findByUserId(req.user.id);
-        const limits = Subscription.getUserLimits(req.user.id);
+        const subscription = await Subscription.findActiveByUserId(req.user.id);
+        const limits = await Subscription.getUserLimits(req.user.id);
 
         res.json({
             subscription: subscription ? {
                 id: subscription.id,
                 planId: subscription.plan_id,
-                planName: subscription.plan_name,
                 billingCycle: subscription.billing_cycle,
                 status: subscription.status,
                 currentPeriodStart: subscription.current_period_start,
-                currentPeriodEnd: subscription.current_period_end
+                currentPeriodEnd: subscription.current_period_end,
+                stripeSubscriptionId: subscription.stripe_subscription_id
             } : null,
             limits: {
                 maxWaitlists: limits.max_waitlists,
@@ -70,9 +71,9 @@ router.get('/current', authenticateToken, (req, res) => {
 
 /**
  * POST /api/subscription/subscribe
- * Subscribe to a plan
+ * Subscribe to a plan (for non-Stripe flow or testing)
  */
-router.post('/subscribe', authenticateToken, (req, res) => {
+router.post('/subscribe', authenticateToken, async (req, res) => {
     try {
         const { planId, billingCycle = 'monthly' } = req.body;
 
@@ -81,13 +82,13 @@ router.post('/subscribe', authenticateToken, (req, res) => {
         }
 
         // Check if plan exists
-        const plan = Subscription.getPlanById(planId);
+        const plan = await Subscription.findPlanById(planId);
         if (!plan) {
             return res.status(404).json({ error: 'Plan not found' });
         }
 
         // Check for enterprise plan
-        if (planId === 'enterprise') {
+        if (plan.is_enterprise || plan.name === 'Enterprise') {
             return res.status(400).json({
                 error: 'Enterprise plans require contacting sales',
                 contactSales: true
@@ -95,7 +96,7 @@ router.post('/subscribe', authenticateToken, (req, res) => {
         }
 
         // Check if user already has active subscription
-        const existingSub = Subscription.findByUserId(req.user.id);
+        const existingSub = await Subscription.findActiveByUserId(req.user.id);
         if (existingSub) {
             return res.status(400).json({
                 error: 'You already have an active subscription. Please upgrade or cancel first.',
@@ -104,14 +105,17 @@ router.post('/subscribe', authenticateToken, (req, res) => {
         }
 
         // Create subscription
-        const subscription = Subscription.create(req.user.id, planId, billingCycle);
+        const subscription = await Subscription.createSubscription({
+            userId: req.user.id,
+            planId,
+            billingCycle
+        });
 
         res.status(201).json({
             message: 'Successfully subscribed',
             subscription: {
                 id: subscription.id,
                 planId: subscription.plan_id,
-                planName: subscription.plan_name,
                 billingCycle: subscription.billing_cycle,
                 status: subscription.status,
                 currentPeriodEnd: subscription.current_period_end
@@ -127,16 +131,22 @@ router.post('/subscribe', authenticateToken, (req, res) => {
  * PUT /api/subscription/change
  * Change subscription plan
  */
-router.put('/change', authenticateToken, (req, res) => {
+router.put('/change', authenticateToken, async (req, res) => {
     try {
         const { planId, billingCycle } = req.body;
 
-        const existingSub = Subscription.findByUserId(req.user.id);
+        const existingSub = await Subscription.findActiveByUserId(req.user.id);
         if (!existingSub) {
             return res.status(404).json({ error: 'No active subscription found' });
         }
 
-        if (planId === 'enterprise') {
+        // Get the new plan
+        const plan = await Subscription.findPlanById(planId);
+        if (!plan) {
+            return res.status(404).json({ error: 'Plan not found' });
+        }
+
+        if (plan.is_enterprise || plan.name === 'Enterprise') {
             return res.status(400).json({
                 error: 'Enterprise plans require contacting sales',
                 contactSales: true
@@ -147,14 +157,13 @@ router.put('/change', authenticateToken, (req, res) => {
         if (planId) updates.plan_id = planId;
         if (billingCycle) updates.billing_cycle = billingCycle;
 
-        const updated = Subscription.update(existingSub.id, updates);
+        const updated = await Subscription.update(existingSub.id, updates);
 
         res.json({
             message: 'Subscription updated',
             subscription: {
                 id: updated.id,
                 planId: updated.plan_id,
-                planName: updated.plan_name,
                 billingCycle: updated.billing_cycle
             }
         });
@@ -168,14 +177,14 @@ router.put('/change', authenticateToken, (req, res) => {
  * POST /api/subscription/cancel
  * Cancel subscription
  */
-router.post('/cancel', authenticateToken, (req, res) => {
+router.post('/cancel', authenticateToken, async (req, res) => {
     try {
-        const existingSub = Subscription.findByUserId(req.user.id);
+        const existingSub = await Subscription.findActiveByUserId(req.user.id);
         if (!existingSub) {
             return res.status(404).json({ error: 'No active subscription found' });
         }
 
-        Subscription.cancel(existingSub.id);
+        await Subscription.cancel(existingSub.id);
 
         res.json({
             message: 'Subscription cancelled',
@@ -184,6 +193,45 @@ router.post('/cancel', authenticateToken, (req, res) => {
     } catch (error) {
         console.error('Error cancelling subscription:', error);
         res.status(500).json({ error: 'Failed to cancel subscription' });
+    }
+});
+
+/**
+ * GET /api/subscription/features
+ * Get user's current features (for frontend feature flags)
+ */
+router.get('/features', authenticateToken, async (req, res) => {
+    try {
+        const limits = await Subscription.getUserLimits(req.user.id);
+
+        // Build feature flags object
+        const featureFlags = {};
+        const allFeatures = [
+            'custom_branding', 'api_access', 'webhooks', 'slack_integration',
+            'email_verification', 'analytics_basic', 'csv_export', 'leaderboard',
+            'remove_branding', 'zapier_integration', 'hide_position_count',
+            'block_personal_emails', 'allowed_domains', 'move_user_position',
+            'analytics_deep', 'custom_email_templates', 'custom_offboarding_email',
+            'custom_domain_emails', 'email_blasts', 'multi_user_team',
+            'sso', 'custom_sla', 'dedicated_support', 'custom_features'
+        ];
+
+        for (const feature of allFeatures) {
+            featureFlags[feature] = limits.features.includes(feature);
+        }
+
+        res.json({
+            planName: limits.plan_name,
+            features: featureFlags,
+            limits: {
+                maxWaitlists: limits.max_waitlists,
+                maxSignupsPerMonth: limits.max_signups_per_month,
+                maxTeamMembers: limits.max_team_members
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching features:', error);
+        res.status(500).json({ error: 'Failed to fetch features' });
     }
 });
 

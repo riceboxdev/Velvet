@@ -3,10 +3,12 @@ const router = express.Router();
 const Waitlist = require('../models/Waitlist');
 const Signup = require('../models/Signup');
 const ZapierHook = require('../models/ZapierHook');
+const Subscription = require('../models/Subscription');
 
 /**
  * Middleware: Authenticate via Zapier API key
  * Zapier sends the API key in the x-api-key header
+ * Also verifies the waitlist owner has Zapier feature access
  */
 async function authenticateZapier(req, res, next) {
     const apiKey = req.headers['x-api-key'];
@@ -27,10 +29,23 @@ async function authenticateZapier(req, res, next) {
         return res.status(401).json({ error: 'Invalid API key' });
     }
 
-    // Check if Zapier is enabled
+    // Check if Zapier is enabled on waitlist settings
     const settings = waitlist.settings || {};
     if (!settings.connectors?.zapier?.enabled) {
         return res.status(403).json({ error: 'Zapier integration is not enabled for this waitlist' });
+    }
+
+    // Check if waitlist owner's plan includes Zapier feature
+    if (waitlist.user_id) {
+        const limits = await Subscription.getUserLimits(waitlist.user_id);
+        if (!limits.features.includes('zapier_integration')) {
+            return res.status(403).json({
+                error: 'Feature restricted',
+                feature: 'zapier_integration',
+                upgrade_required: true,
+                message: 'Zapier integration requires an Advanced plan or higher.'
+            });
+        }
     }
 
     req.waitlist = waitlist;

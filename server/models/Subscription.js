@@ -57,7 +57,7 @@ class Subscription {
     /**
      * Create a subscription for a user
      */
-    static async createSubscription({ userId, planId, billingCycle = 'monthly' }) {
+    static async createSubscription({ userId, planId, billingCycle = 'monthly', stripeSubscriptionId = null }) {
         const id = nanoid(20);
         const now = new Date();
         const periodEnd = new Date(now);
@@ -77,10 +77,33 @@ class Subscription {
             current_period_end: periodEnd,
             created_at: FieldValue.serverTimestamp(),
             updated_at: FieldValue.serverTimestamp(),
-            cancelled_at: null
+            cancelled_at: null,
+            stripe_subscription_id: stripeSubscriptionId
         };
 
         await db.collection(SUBSCRIPTIONS_COLLECTION).doc(id).set(subscriptionData);
+        return this.findSubscriptionById(id);
+    }
+
+    /**
+     * Update subscription
+     */
+    static async update(id, updates) {
+        const allowedFields = [
+            'plan_id', 'billing_cycle', 'status',
+            'current_period_end', 'stripe_subscription_id',
+            'cancelled_at'
+        ];
+
+        const sanitizedUpdates = {};
+        for (const key of allowedFields) {
+            if (updates[key] !== undefined) {
+                sanitizedUpdates[key] = updates[key];
+            }
+        }
+        sanitizedUpdates.updated_at = FieldValue.serverTimestamp();
+
+        await db.collection(SUBSCRIPTIONS_COLLECTION).doc(id).update(sanitizedUpdates);
         return this.findSubscriptionById(id);
     }
 

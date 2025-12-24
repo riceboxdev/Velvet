@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const config = useRuntimeConfig()
+const toast = useToast()
 
 interface Plan {
   id: string
@@ -10,21 +11,26 @@ interface Plan {
   maxWaitlists: number | null
   maxSignupsPerMonth: number | null
   features: string[]
+  isFree: boolean
+  isEnterprise: boolean
 }
 
 interface Subscription {
+  id: string
   planId: string
-  planName: string
   billingCycle: string
   status: string
   currentPeriodEnd: string
+  stripeSubscriptionId: string | null
 }
 
 interface Limits {
   maxWaitlists: number | null
   maxSignupsPerMonth: number | null
+  maxTeamMembers: number | null
   planName: string
   hasSubscription: boolean
+  features: string[]
 }
 
 const API_URL = config.public.apiUrl || 'http://localhost:3001'
@@ -33,15 +39,23 @@ const loading = ref(true)
 const subscription = ref<Subscription | null>(null)
 const limits = ref<Limits | null>(null)
 const plans = ref<Plan[]>([])
+const changingPlan = ref(false)
+const selectedPlan = ref<Plan | null>(null)
+const showPlanModal = ref(false)
+const billingCycle = ref<'monthly' | 'annual'>('monthly')
 
 onMounted(async () => {
   await Promise.all([fetchSubscription(), fetchPlans()])
   loading.value = false
 })
 
+async function getAuthToken() {
+  return localStorage.getItem('velvet_token')
+}
+
 async function fetchSubscription() {
   try {
-    const token = localStorage.getItem('velvet_token')
+    const token = await getAuthToken()
     const response = await fetch(`${API_URL}/api/subscription/current`, {
       headers: { Authorization: `Bearer ${token}` }
     })
@@ -66,6 +80,11 @@ async function fetchPlans() {
   }
 }
 
+// Filter to only show paid plans (not free or enterprise)
+const paidPlans = computed(() => 
+  plans.value.filter(p => !p.isFree && !p.isEnterprise && p.monthlyPrice > 0)
+)
+
 function formatDate(dateStr: string) {
   if (!dateStr) return '-'
   return new Date(dateStr).toLocaleDateString('en-US', {
@@ -81,13 +100,118 @@ function formatNumber(num: number | null | undefined) {
   return num.toString()
 }
 
-function handleUpgrade() {
-  navigateTo('/pricing')
+function openPlanModal(plan: Plan) {
+  if (plan.isEnterprise) {
+    window.location.href = 'mailto:sales@velvet.dev?subject=Enterprise%20Plan%20Inquiry'
+    return
+  }
+  selectedPlan.value = plan
+  showPlanModal.value = true
 }
 
-function handleManageBilling() {
-  // TODO: Redirect to Stripe billing portal
-  alert('Billing portal coming soon!')
+async function handleSelectPlan() {
+  if (!selectedPlan.value) return
+  
+  changingPlan.value = true
+  
+  try {
+    const token = await getAuthToken()
+    
+    // Create Stripe Checkout session
+    const response = await fetch(`${API_URL}/api/stripe/create-checkout-session`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        planName: selectedPlan.value.name,
+        billingCycle: billingCycle.value
+      })
+    })
+
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.details || error.error || 'Failed to create checkout session')
+    }
+
+    const { url } = await response.json()
+    
+    // Redirect to Stripe Checkout
+    if (url) {
+      window.location.href = url
+    }
+  } catch (error: any) {
+    console.error('Checkout error:', error)
+    toast.add({
+      title: 'Error',
+      description: error.message || 'Failed to start checkout',
+      color: 'error'
+    })
+  } finally {
+    changingPlan.value = false
+    showPlanModal.value = false
+  }
+}
+
+async function handleManageBilling() {
+  try {
+    const token = await getAuthToken()
+    
+    const response = await fetch(`${API_URL}/api/stripe/create-portal-session`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      }
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to open billing portal')
+    }
+
+    const { url } = await response.json()
+    
+    if (url) {
+      window.location.href = url
+    }
+  } catch (error: any) {
+    console.error('Portal error:', error)
+    toast.add({
+      title: 'Error',
+      description: error.message || 'Failed to open billing portal',
+      color: 'error'
+    })
+  }
+}
+
+// Check for success/canceled from Stripe redirect
+onMounted(() => {
+  const route = useRoute()
+  if (route.query.success === 'true') {
+    toast.add({
+      title: 'Success!',
+      description: 'Your subscription has been activated.',
+      color: 'success'
+    })
+  } else if (route.query.canceled === 'true') {
+    toast.add({
+      title: 'Checkout Canceled',
+      description: 'Your subscription was not changed.',
+      color: 'warning'
+    })
+  }
+})
+
+function getPlanPrice(plan: Plan) {
+  if (billingCycle.value === 'annual') {
+    return plan.annualMonthlyPrice || Math.round(plan.annualPrice / 12)
+  }
+  return plan.monthlyPrice
+}
+
+function isCurrentPlan(plan: Plan) {
+  return limits.value?.planName === plan.name
 }
 </script>
 
@@ -126,6 +250,13 @@ function handleManageBilling() {
               >
                 Active
               </UBadge>
+              <UBadge
+                v-else-if="subscription?.status === 'past_due'"
+                color="error"
+                variant="subtle"
+              >
+                Past Due
+              </UBadge>
             </div>
 
             <div v-if="subscription" class="text-sm text-dimmed">
@@ -144,14 +275,14 @@ function handleManageBilling() {
 
           <div class="flex gap-3">
             <UButton
-              v-if="subscription"
+              v-if="subscription?.stripeSubscriptionId"
               color="neutral"
               variant="outline"
               @click="handleManageBilling"
             >
               Manage Billing
             </UButton>
-            <UButton @click="handleUpgrade">
+            <UButton to="/pricing">
               {{ subscription ? 'Change Plan' : 'Upgrade' }}
             </UButton>
           </div>
@@ -204,7 +335,7 @@ function handleManageBilling() {
             <div>
               <div class="text-2xl font-bold">1</div>
               <div class="text-sm text-dimmed">
-                team member
+                of {{ limits?.maxTeamMembers ?? '∞' }} team members
               </div>
             </div>
           </div>
@@ -220,20 +351,31 @@ function handleManageBilling() {
         class="mb-4"
       />
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Billing Cycle Toggle -->
+      <div class="flex items-center justify-center gap-4 mb-6">
+        <span :class="['text-sm font-medium', billingCycle === 'monthly' ? 'text-primary' : 'text-dimmed']">
+          Monthly
+        </span>
+        <USwitch v-model="billingCycle" on-value="annual" off-value="monthly" />
+        <span :class="['text-sm font-medium', billingCycle === 'annual' ? 'text-primary' : 'text-dimmed']">
+          Annual
+        </span>
+        <UBadge v-if="billingCycle === 'annual'" color="success" variant="subtle">Save 33%</UBadge>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <UCard
-          v-for="plan in plans"
+          v-for="plan in paidPlans"
           :key="plan.id"
           :ui="{
-            root: limits?.planName === plan.name ? 'ring-2 ring-primary' : ''
+            root: isCurrentPlan(plan) ? 'ring-2 ring-primary' : ''
           }"
         >
           <div class="text-center">
             <h3 class="font-semibold mb-1">{{ plan.name }}</h3>
-            <div v-if="plan.monthlyPrice > 0" class="text-2xl font-bold">
-              ${{ plan.monthlyPrice }}<span class="text-sm text-dimmed font-normal">/mo</span>
+            <div class="text-2xl font-bold">
+              ${{ getPlanPrice(plan) }}<span class="text-sm text-dimmed font-normal">/mo</span>
             </div>
-            <div v-else class="text-2xl font-bold">Custom</div>
 
             <div class="text-xs text-dimmed mt-2 space-y-1">
               <div>{{ plan.maxWaitlists ?? 'Unlimited' }} waitlists</div>
@@ -241,15 +383,14 @@ function handleManageBilling() {
             </div>
 
             <UButton
-              v-if="limits?.planName !== plan.name"
+              v-if="!isCurrentPlan(plan)"
               size="sm"
-              color="neutral"
-              variant="outline"
+              color="primary"
               class="mt-4"
               block
-              @click="handleUpgrade"
+              @click="openPlanModal(plan)"
             >
-              {{ plan.monthlyPrice === 0 ? 'Contact Sales' : 'Select' }}
+              Select
             </UButton>
             <UBadge
               v-else
@@ -263,5 +404,51 @@ function handleManageBilling() {
         </UCard>
       </div>
     </template>
+
+    <!-- Plan Selection Modal -->
+    <UModal v-model:open="showPlanModal">
+      <UCard v-if="selectedPlan">
+        <template #header>
+          <h3 class="font-semibold text-lg">Upgrade to {{ selectedPlan.name }}</h3>
+        </template>
+
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <span>Plan</span>
+            <span class="font-semibold">{{ selectedPlan.name }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span>Billing</span>
+            <span class="font-semibold capitalize">{{ billingCycle }}</span>
+          </div>
+          <div class="flex items-center justify-between border-t pt-4">
+            <span class="font-semibold">Total</span>
+            <div class="text-right">
+              <div class="text-2xl font-bold">
+                ${{ billingCycle === 'annual' ? selectedPlan.annualPrice : selectedPlan.monthlyPrice }}
+              </div>
+              <div class="text-xs text-dimmed">
+                {{ billingCycle === 'annual' ? 'per year' : 'per month' }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <template #footer>
+          <div class="flex justify-end gap-3">
+            <UButton color="neutral" variant="outline" @click="showPlanModal = false">
+              Cancel
+            </UButton>
+            <UButton 
+              color="primary" 
+              :loading="changingPlan"
+              @click="handleSelectPlan"
+            >
+              Continue to Checkout
+            </UButton>
+          </div>
+        </template>
+      </UCard>
+    </UModal>
   </div>
 </template>

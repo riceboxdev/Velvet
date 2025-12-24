@@ -6,6 +6,21 @@ async function seedPlans() {
 
     const plans = [
         {
+            name: 'Free',
+            description: 'Get started with 1 waitlist',
+            monthlyPrice: 0,
+            annualPrice: 0,
+            maxWaitlists: 1,
+            maxSignupsPerMonth: 100,
+            maxTeamMembers: 1,
+            features: [
+                'custom_branding',
+                'email_verification',
+                'csv_export'
+            ],
+            sortOrder: 0
+        },
+        {
             name: 'Basic',
             description: 'For individuals and small projects',
             monthlyPrice: 15,
@@ -17,7 +32,11 @@ async function seedPlans() {
                 'custom_branding',
                 'api_access',
                 'webhooks',
-                'analytics_basic'
+                'slack_integration',
+                'email_verification',
+                'analytics_basic',
+                'csv_export',
+                'leaderboard'
             ],
             sortOrder: 1
         },
@@ -30,15 +49,22 @@ async function seedPlans() {
             maxSignupsPerMonth: null,
             maxTeamMembers: 5,
             features: [
+                // All Basic features
                 'custom_branding',
                 'api_access',
                 'webhooks',
+                'slack_integration',
+                'email_verification',
                 'analytics_basic',
+                'csv_export',
+                'leaderboard',
+                // Advanced-only features
                 'remove_branding',
                 'zapier_integration',
                 'hide_position_count',
                 'block_personal_emails',
-                'allowed_domains'
+                'allowed_domains',
+                'move_user_position'
             ],
             sortOrder: 2
         },
@@ -51,15 +77,23 @@ async function seedPlans() {
             maxSignupsPerMonth: null,
             maxTeamMembers: null, // Unlimited
             features: [
+                // All Basic features
                 'custom_branding',
                 'api_access',
                 'webhooks',
-                'analytics_deep',
+                'slack_integration',
+                'email_verification',
+                'csv_export',
+                'leaderboard',
+                // All Advanced features
                 'remove_branding',
                 'zapier_integration',
                 'hide_position_count',
                 'block_personal_emails',
                 'allowed_domains',
+                'move_user_position',
+                // Pro-only features
+                'analytics_deep',
                 'custom_email_templates',
                 'custom_offboarding_email',
                 'custom_domain_emails',
@@ -67,6 +101,44 @@ async function seedPlans() {
                 'multi_user_team'
             ],
             sortOrder: 3
+        },
+        {
+            name: 'Enterprise',
+            description: 'Custom solutions for large organizations',
+            monthlyPrice: 0, // Custom pricing
+            annualPrice: 0,
+            maxWaitlists: null,
+            maxSignupsPerMonth: null,
+            maxTeamMembers: null,
+            features: [
+                // All features
+                'custom_branding',
+                'api_access',
+                'webhooks',
+                'slack_integration',
+                'email_verification',
+                'csv_export',
+                'leaderboard',
+                'remove_branding',
+                'zapier_integration',
+                'hide_position_count',
+                'block_personal_emails',
+                'allowed_domains',
+                'move_user_position',
+                'analytics_deep',
+                'custom_email_templates',
+                'custom_offboarding_email',
+                'custom_domain_emails',
+                'email_blasts',
+                'multi_user_team',
+                // Enterprise-only
+                'sso',
+                'custom_sla',
+                'dedicated_support',
+                'custom_features'
+            ],
+            sortOrder: 4,
+            isEnterprise: true
         }
     ];
 
@@ -89,7 +161,8 @@ async function seedPlans() {
                 max_signups_per_month: plan.maxSignupsPerMonth,
                 max_team_members: plan.maxTeamMembers,
                 features: plan.features,
-                sort_order: plan.sortOrder
+                sort_order: plan.sortOrder,
+                is_enterprise: plan.isEnterprise || false
             });
         } else {
             console.log(`Creating plan ${plan.name}...`);
