@@ -11,55 +11,136 @@ const emailService = require('../services/email');
  * Supports both API key (x-api-key header) and direct waitlist_id in body
  */
 router.post('/', async (req, res) => {
-    // ... [existing logic] 
+    try {
+        const apiKey = req.headers['x-api-key'];
+        const { email, waitlist_id, referral_code, referral_link, metadata = {} } = req.body;
 
-    const signup = await Signup.create({
-        waitlistId: waitlist.id,
-        email,
-        referredBy: referral_code || referral_link || null,
-        metadata,
-        ipAddress: req.ip,
-        userAgent: req.headers['user-agent'],
-        priorityBoost
-    });
-
-    // Send welcome email (fire and forget to not block response)
-    if (settings.sendWelcomeEmail) {
-        emailService.sendWelcomeEmail(signup, waitlist).catch(err =>
-            console.error('[Signup] Failed to send welcome email:', err.message)
-        );
-    }
-
-    // Check for referral
-    if (signup.referredBy) {
-        // Find referrer
-        // For now, we need to handle this carefully as Signup.create doesn't return the referrer info directly
-        // and we might need to look it up.
-        // But wait, our Signup model handles the referral counting. 
-        // We need to fetch the referrer to get their email if we want to notify them.
-
-        // NOTE: Ideally Signup.create or a subsequent call handles the referral logic. 
-        // If the model updates the referrer's count, we might want to fetch that referrer here.
-        try {
-            // Assuming Signup model handles finding referrer by code/link
-            // We'll create a helper or just search here if needed.
-            // For now, let's stick to the Welcome Email fix as primary.
-        } catch (e) {
-            console.error('Referral notification error', e);
+        if (!email) {
+            return res.status(400).json({ error: 'Email is required' });
         }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({
+                error: 'Invalid email',
+                message: 'Please provide a valid email address'
+            });
+        }
+
+        let waitlist;
+
+        // Support both API key and direct waitlist_id
+        if (apiKey) {
+            waitlist = await Waitlist.findByApiKey(apiKey);
+            if (!waitlist) {
+                return res.status(401).json({ error: 'Invalid API key' });
+            }
+        } else if (waitlist_id) {
+            waitlist = await Waitlist.findById(waitlist_id);
+            if (!waitlist) {
+                return res.status(404).json({ error: 'Waitlist not found' });
+            }
+        } else {
+            return res.status(400).json({ error: 'API key or waitlist_id required' });
+        }
+
+        if (!waitlist.is_active) {
+            return res.status(403).json({ error: 'Waitlist is not active' });
+        }
+
+        // Get waitlist settings with defaults
+        const settings = { ...Waitlist.getDefaultSettings(), ...(waitlist.settings || {}) };
+
+        // Check if waitlist is closed
+        if (settings.closed) {
+            return res.status(403).json({
+                error: 'Waitlist closed',
+                message: 'This waitlist is currently not accepting new signups'
+            });
+        }
+
+        // Validate domain restrictions
+        const emailDomain = email.toLowerCase().split('@')[1];
+
+        // Check permitted domains (if any specified)
+        if (settings.permittedDomains && settings.permittedDomains.length > 0) {
+            const isPermitted = settings.permittedDomains.some(domain =>
+                emailDomain === domain.toLowerCase() || emailDomain.endsWith('.' + domain.toLowerCase())
+            );
+            if (!isPermitted) {
+                return res.status(403).json({
+                    error: 'Domain not permitted',
+                    message: `Only emails from ${settings.permittedDomains.join(', ')} are allowed`
+                });
+            }
+        }
+
+        // Check if blocking free email providers
+        if (settings.blockFreeEmails) {
+            const freeEmailDomains = Waitlist.getFreeEmailDomains();
+            if (freeEmailDomains.includes(emailDomain)) {
+                return res.status(403).json({
+                    error: 'Personal email not allowed',
+                    message: 'Please use a business or organizational email address'
+                });
+            }
+        }
+
+        // Check if already signed up
+        const existing = await Signup.findByEmail(waitlist.id, email);
+        if (existing) {
+            return res.status(409).json({
+                error: 'Already registered',
+                message: 'This email is already on the waitlist',
+                data: {
+                    referral_code: existing.referral_code,
+                    position: existing.position,
+                    referral_count: existing.referral_count || 0
+                }
+            });
+        }
+
+        // Create signup (support both referral_code and referral_link)
+        // Priority boost = spotsSkippedOnReferral * 10 (to allow for fractional ordering)
+        const priorityBoost = (settings.spotsSkippedOnReferral || 3) * 10;
+
+        const signup = await Signup.create({
+            waitlistId: waitlist.id,
+            email,
+            referredBy: referral_code || referral_link || null,
+            metadata,
+            ipAddress: req.ip,
+            userAgent: req.headers['user-agent'],
+            priorityBoost
+        });
+
+        // Send welcome email (fire and forget to not block response)
+        if (settings.sendWelcomeEmail) {
+            emailService.sendWelcomeEmail(signup, waitlist).catch(err =>
+                console.error('[Signup] Failed to send welcome email:', err.message)
+            );
+        }
+
+        // Check for referral logic (placeholder for future referral notifications)
+        if (signup.referredBy) {
+            // Logic to notify referrer could go here
+        }
+
+        res.status(201).json({
+            success: true,
+            data: {
+                id: signup.id,
+                email: signup.email,
+                referral_code: signup.referral_code,
+                position: signup.position,
+                referral_count: 0
+            }
+        });
+    } catch (error) {
+        console.error('[Signup] Create error:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
-
-    // Actually, to keep it simple and safe:
-    // Let's just create the signup and send the welcome email first.
-
-    /* 
-       The simpler fix is to just insert the email call after Signup.create.
-       The helper `sendReferralNotification` also requires the referrer object.
-       The current `Signup.create` calls `processReferral` internally maybe? 
-       I should check `models/Signup.js` to see if it returns referrer info or if I need to fetch it.
-    */
-
-    // ...
 });
 
 
