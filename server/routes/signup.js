@@ -122,9 +122,18 @@ router.post('/', async (req, res) => {
             );
         }
 
-        // Check for referral logic (placeholder for future referral notifications)
-        if (signup.referredBy) {
-            // Logic to notify referrer could go here
+        // Send referral notification email if enabled and there's a referrer
+        if (signup.referredBy && settings.emailOnReferral) {
+            // Find the referrer to get their email and updated count
+            Signup.findByReferralCode(signup.referredBy).then(referrer => {
+                if (referrer) {
+                    emailService.sendReferralNotification(referrer, referrer.referral_count, waitlist).catch(err =>
+                        console.error('[Signup] Failed to send referral notification:', err.message)
+                    );
+                }
+            }).catch(err => {
+                console.error('[Signup] Error finding referrer:', err.message);
+            });
         }
 
         res.status(201).json({
