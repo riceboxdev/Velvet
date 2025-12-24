@@ -1,4 +1,223 @@
 {
-    "indexes": [],
+    "indexes": [
+        {
+            "collectionGroup": "waitlists",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "user_id",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "created_at",
+                    "order": "DESCENDING"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "signups",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "waitlist_id",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "position",
+                    "order": "ASCENDING"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "signups",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "waitlist_id",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "position",
+                    "order": "DESCENDING"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "signups",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "waitlist_id",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "created_at",
+                    "order": "ASCENDING"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "signups",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "waitlist_id",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "created_at",
+                    "order": "DESCENDING"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "signups",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "waitlist_id",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "referral_count",
+                    "order": "ASCENDING"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "signups",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "waitlist_id",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "referral_count",
+                    "order": "DESCENDING"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "signups",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "waitlist_id",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "priority",
+                    "order": "ASCENDING"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "signups",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "waitlist_id",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "priority",
+                    "order": "DESCENDING"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "signups",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "waitlist_id",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "status",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "position",
+                    "order": "ASCENDING"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "signups",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "waitlist_id",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "status",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "priority",
+                    "order": "DESCENDING"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "signups",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "waitlist_id",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "email",
+                    "order": "ASCENDING"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "subscription_plans",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "is_active",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "sort_order",
+                    "order": "ASCENDING"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "subscriptions",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "user_id",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "status",
+                    "order": "ASCENDING"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "webhooks",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "waitlist_id",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "is_active",
+                    "order": "ASCENDING"
+                }
+            ]
+        }
+    ],
     "fieldOverrides": []
 }

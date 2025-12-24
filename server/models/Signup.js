@@ -99,35 +99,15 @@ class Signup {
             query = query.where('status', '==', status);
         }
 
-        // Fetch all matching documents (we'll sort and limit in memory to avoid index requirements)
-        const snapshot = await query.get();
-        let signups = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-        // Sort in memory to avoid composite index requirement
+        // Use native Firestore ordering (requires composite indexes)
         const validSortFields = ['position', 'created_at', 'referral_count', 'priority'];
         const sortField = validSortFields.includes(sortBy) ? sortBy : 'position';
         const sortOrder = order.toLowerCase() === 'desc' ? 'desc' : 'asc';
 
-        signups.sort((a, b) => {
-            let valA = a[sortField];
-            let valB = b[sortField];
+        query = query.orderBy(sortField, sortOrder).limit(limit);
 
-            // Handle Firestore timestamps
-            if (valA?.toDate) valA = valA.toDate();
-            if (valB?.toDate) valB = valB.toDate();
-
-            // Handle null/undefined
-            if (valA == null) valA = sortOrder === 'asc' ? Infinity : -Infinity;
-            if (valB == null) valB = sortOrder === 'asc' ? Infinity : -Infinity;
-
-            if (sortOrder === 'desc') {
-                return valB > valA ? 1 : valB < valA ? -1 : 0;
-            }
-            return valA > valB ? 1 : valA < valB ? -1 : 0;
-        });
-
-        // Apply limit (offset not fully supported but we can slice)
-        return signups.slice(offset, offset + limit);
+        const snapshot = await query.get();
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     }
 
     /**
