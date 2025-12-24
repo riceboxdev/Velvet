@@ -29,9 +29,12 @@ router.get('/:waitlistId', async (req, res) => {
                 total_signups: stats || 0,
                 is_active: waitlist.is_active,
                 settings: {
-                    // Only expose public settings
+                    // Expose public settings needed for hosted page
                     branding: waitlist.settings?.branding || {},
-                    showLeaderboard: waitlist.settings?.showLeaderboard !== false
+                    showLeaderboard: waitlist.settings?.showLeaderboard !== false,
+                    widget: waitlist.settings?.widget || {},
+                    social: waitlist.settings?.social || {},
+                    questions: waitlist.settings?.questions || {}
                 }
             }
         });
