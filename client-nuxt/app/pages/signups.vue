@@ -12,14 +12,18 @@ const searchQuery = ref('')
 const pagination = ref({ total: 0, hasMore: false })
 
 onMounted(async () => {
+  console.log('[Signups Page] onMounted - currentWaitlist:', store.currentWaitlist?.id)
   // Ensure waitlists are loaded first
   if (!store.currentWaitlist) {
+    console.log('[Signups Page] No currentWaitlist, fetching all waitlists...')
     await store.fetchAllWaitlists()
+    console.log('[Signups Page] After fetchAllWaitlists - currentWaitlist:', store.currentWaitlist?.id)
   }
   await loadSignups()
 })
 
 async function loadSignups() {
+  console.log('[Signups Page] loadSignups called - currentWaitlist:', store.currentWaitlist?.id)
   const data = await store.fetchSignups({
     limit: pageSize,
     offset: currentPage.value * pageSize,
@@ -27,6 +31,9 @@ async function loadSignups() {
     sortBy: sortBy.value,
     order: sortOrder.value
   })
+
+  console.log('[Signups Page] fetchSignups returned:', data)
+  console.log('[Signups Page] store.signups:', store.signups)
 
   if (data?.pagination) {
     pagination.value = data.pagination
