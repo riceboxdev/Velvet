@@ -142,12 +142,14 @@ class Waitlist {
     static async create({ name, description = '', userId }) {
         const id = nanoid(20);
         const apiKey = `wl_${nanoid(32)}`;
+        const zapierApiKey = `zap_${nanoid(32)}`;
 
         const waitlistData = {
             user_id: userId,
             name,
             description,
             api_key: apiKey,
+            zapier_api_key: zapierApiKey,
             settings: { ...DEFAULT_SETTINGS },
             total_signups: 0,
             is_active: true,
@@ -174,6 +176,20 @@ class Waitlist {
     static async findByApiKey(apiKey) {
         const snapshot = await db.collection(COLLECTION)
             .where('api_key', '==', apiKey)
+            .limit(1)
+            .get();
+
+        if (snapshot.empty) return null;
+        const doc = snapshot.docs[0];
+        return { id: doc.id, ...doc.data() };
+    }
+
+    /**
+     * Find waitlist by Zapier API key
+     */
+    static async findByZapierApiKey(zapierApiKey) {
+        const snapshot = await db.collection(COLLECTION)
+            .where('zapier_api_key', '==', zapierApiKey)
             .limit(1)
             .get();
 
@@ -316,6 +332,18 @@ class Waitlist {
         const newApiKey = `wl_${nanoid(32)}`;
         await db.collection(COLLECTION).doc(id).update({
             api_key: newApiKey,
+            updated_at: FieldValue.serverTimestamp()
+        });
+        return this.findById(id);
+    }
+
+    /**
+     * Regenerate Zapier API key
+     */
+    static async regenerateZapierKey(id) {
+        const newZapierKey = `zap_${nanoid(32)}`;
+        await db.collection(COLLECTION).doc(id).update({
+            zapier_api_key: newZapierKey,
             updated_at: FieldValue.serverTimestamp()
         });
         return this.findById(id);

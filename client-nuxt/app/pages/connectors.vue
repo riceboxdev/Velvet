@@ -6,6 +6,7 @@ import { useAuthStore } from '~/stores/auth'
 const waitlistStore = useWaitlistStore()
 const authStore = useAuthStore()
 const toast = useToast()
+const config = useRuntimeConfig()
 
 const state = reactive({
   connectors: {
@@ -25,6 +26,7 @@ watchEffect(() => {
 })
 
 const loading = ref(false)
+const regeneratingZapierKey = ref(false)
 
 async function saveSettings() {
   loading.value = true
@@ -44,9 +46,37 @@ async function saveSettings() {
 }
 
 function copyZapierKey() {
-  if (!waitlistStore.currentWaitlist?.api_key) return
-  navigator.clipboard.writeText(waitlistStore.currentWaitlist.api_key)
+  const key = waitlistStore.currentWaitlist?.zapier_api_key
+  if (!key) {
+    // Fallback to regular API key for backwards compatibility
+    if (!waitlistStore.currentWaitlist?.api_key) return
+    navigator.clipboard.writeText(waitlistStore.currentWaitlist.api_key)
+  } else {
+    navigator.clipboard.writeText(key)
+  }
   toast.add({ title: 'Copied to clipboard', color: 'success' })
+}
+
+async function regenerateZapierKey() {
+  if (!waitlistStore.currentWaitlist?.id) return
+  
+  regeneratingZapierKey.value = true
+  try {
+    const response = await $fetch(`${config.public.apiBase}/waitlists/${waitlistStore.currentWaitlist.id}/regenerate-zapier-key`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${await authStore.getIdToken()}`
+      }
+    })
+    
+    // Refresh waitlist data
+    await waitlistStore.fetchWaitlist(waitlistStore.currentWaitlist.id)
+    toast.add({ title: 'Zapier key regenerated', description: 'Remember to update your Zaps with the new key!', color: 'success' })
+  } catch (error) {
+    toast.add({ title: 'Failed to regenerate key', color: 'error' })
+  } finally {
+    regeneratingZapierKey.value = false
+  }
 }
 
 // Mock connection functions
@@ -71,6 +101,13 @@ async function connectHubspot() {
   saveSettings()
   toast.add({ title: 'Connected to Hubspot', color: 'success' })
 }
+
+// Zapier trigger types for display
+const zapierTriggers = [
+  { name: 'New Signup', description: 'Triggers when a user signs up for your waitlist', icon: 'i-lucide-user-plus' },
+  { name: 'New Referrer', description: 'Triggers when a user successfully refers someone', icon: 'i-lucide-share-2' },
+  { name: 'Offboard', description: 'Triggers when you offboard a user from the waitlist', icon: 'i-lucide-user-check' }
+]
 </script>
 
 <template>
@@ -95,15 +132,20 @@ async function connectHubspot() {
           <!-- Zapier -->
           <section>
             <div class="flex items-start justify-between mb-4">
-              <div>
-                <h4 class="font-medium text-lg">Zapier</h4>
-                <p class="text-sm text-dimmed">Trigger Zapier hooks on User Signup and Offboarding.</p>
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-[#FF4A00]/10 flex items-center justify-center">
+                  <UIcon name="i-logos-zapier" class="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 class="font-medium text-lg">Zapier</h4>
+                  <p class="text-sm text-dimmed">Automate workflows with 5,000+ apps</p>
+                </div>
               </div>
               <p class="text-xs text-primary bg-primary/10 px-2 py-1 rounded">PRO</p>
             </div>
 
             <div class="space-y-4 border rounded-lg p-4 bg-gray-50 dark:bg-gray-900/50">
-              <UFormGroup label="Enable Zapier">
+              <UFormGroup label="Enable Zapier Integration">
                 <UToggle 
                   v-model="state.connectors.zapier.enabled" 
                   @change="saveSettings" 
@@ -119,13 +161,14 @@ async function connectHubspot() {
                 leave-from-class="translate-y-0 opacity-100"
                 leave-to-class="translate-y-1 opacity-0"
               >
-                <div v-if="state.connectors.zapier.enabled" class="pt-2">
-                  <UFormGroup label="Zapier Key" help="Please use this key to connect with Zapier.">
+                <div v-if="state.connectors.zapier.enabled" class="space-y-6 pt-2">
+                  <!-- Zapier API Key -->
+                  <UFormGroup label="Zapier API Key" help="Use this key to connect with Zapier. Do not share this key.">
                     <div class="flex gap-2">
                       <UInput
-                        :model-value="waitlistStore.currentWaitlist?.api_key"
+                        :model-value="waitlistStore.currentWaitlist?.zapier_api_key || waitlistStore.currentWaitlist?.api_key"
                         readonly
-                        class="flex-1"
+                        class="flex-1 font-mono text-sm"
                         type="password"
                       />
                       <UButton
@@ -134,8 +177,47 @@ async function connectHubspot() {
                         variant="soft"
                         @click="copyZapierKey"
                       />
+                      <UButton
+                        icon="i-lucide-refresh-cw"
+                        color="neutral"
+                        variant="soft"
+                        :loading="regeneratingZapierKey"
+                        @click="regenerateZapierKey"
+                        title="Regenerate key"
+                      />
                     </div>
                   </UFormGroup>
+
+                  <!-- Available Triggers -->
+                  <div>
+                    <h5 class="text-sm font-medium mb-3">Available Triggers</h5>
+                    <div class="grid gap-3">
+                      <div 
+                        v-for="trigger in zapierTriggers" 
+                        :key="trigger.name"
+                        class="flex items-start gap-3 p-3 rounded-lg border bg-white dark:bg-gray-800/50"
+                      >
+                        <UIcon :name="trigger.icon" class="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                        <div>
+                          <div class="font-medium text-sm">{{ trigger.name }}</div>
+                          <p class="text-xs text-dimmed">{{ trigger.description }}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Zapier Link -->
+                  <UButton
+                    variant="outline"
+                    color="neutral"
+                    block
+                    to="https://zapier.com/apps"
+                    target="_blank"
+                    icon="i-lucide-external-link"
+                    trailing
+                  >
+                    Open Zapier App Directory
+                  </UButton>
                 </div>
               </Transition>
             </div>
@@ -211,3 +293,4 @@ async function connectHubspot() {
     </template>
   </UDashboardPanel>
 </template>
+

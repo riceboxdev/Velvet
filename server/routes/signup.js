@@ -4,6 +4,7 @@ const { authenticateToken: verifyToken, optionalAuth } = require('../middleware/
 const Signup = require('../models/Signup');
 const Waitlist = require('../models/Waitlist');
 const emailService = require('../services/email');
+const zapierService = require('../services/zapier');
 
 /**
  * POST /signup
@@ -122,14 +123,28 @@ router.post('/', async (req, res) => {
             );
         }
 
+        // Trigger Zapier new_signup event
+        if (settings.connectors?.zapier?.enabled) {
+            zapierService.sendNewSignupEvent(signup, waitlist).catch(err =>
+                console.error('[Signup] Zapier new_signup event failed:', err.message)
+            );
+        }
+
         // Send referral notification email if enabled and there's a referrer
-        if (signup.referredBy && settings.emailOnReferral) {
+        if (signup.referred_by && settings.emailOnReferral) {
             // Find the referrer to get their email and updated count
-            Signup.findByReferralCode(signup.referredBy).then(referrer => {
+            Signup.findByReferralCode(signup.referred_by).then(referrer => {
                 if (referrer) {
                     emailService.sendReferralNotification(referrer, referrer.referral_count, waitlist).catch(err =>
                         console.error('[Signup] Failed to send referral notification:', err.message)
                     );
+
+                    // Trigger Zapier new_referrer event
+                    if (settings.connectors?.zapier?.enabled) {
+                        zapierService.sendReferrerEvent(referrer, waitlist).catch(err =>
+                            console.error('[Signup] Zapier new_referrer event failed:', err.message)
+                        );
+                    }
                 }
             }).catch(err => {
                 console.error('[Signup] Error finding referrer:', err.message);
@@ -285,6 +300,14 @@ router.put('/:id/offboard', verifyToken, async (req, res) => {
         }
 
         const updated = await Signup.offboard(req.params.id);
+
+        // Trigger Zapier offboard event
+        const settings = waitlist.settings || {};
+        if (settings.connectors?.zapier?.enabled) {
+            zapierService.sendOffboardEvent(updated, waitlist).catch(err =>
+                console.error('[Signups] Zapier offboard event failed:', err.message)
+            );
+        }
 
         res.json({
             success: true,

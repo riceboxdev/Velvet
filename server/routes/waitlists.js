@@ -256,6 +256,34 @@ router.post('/:id/regenerate-key', async (req, res) => {
 });
 
 /**
+ * POST /api/waitlists/:id/regenerate-zapier-key
+ * Regenerate Zapier API key
+ */
+router.post('/:id/regenerate-zapier-key', async (req, res) => {
+    try {
+        const waitlist = await Waitlist.findById(req.params.id);
+
+        if (!waitlist) {
+            return res.status(404).json({ error: 'Waitlist not found' });
+        }
+
+        if (waitlist.user_id !== req.auth.uid) {
+            return res.status(403).json({ error: 'Access denied' });
+        }
+
+        const updated = await Waitlist.regenerateZapierKey(req.params.id);
+
+        res.json({
+            success: true,
+            data: { zapier_api_key: updated.zapier_api_key }
+        });
+    } catch (error) {
+        console.error('[Waitlists] Regenerate Zapier key error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+/**
  * POST /api/waitlists/:id/test-email
  * Send a test welcome email to the current user
  */
