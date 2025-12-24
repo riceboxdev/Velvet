@@ -30,13 +30,13 @@ router.get('/theme', async (req, res) => {
  */
 router.put('/theme', async (req, res) => {
     try {
-        const user = await User.findById(req.user.uid);
-        if (!user?.is_admin) {
+        // req.user is already the full user object from verifyToken middleware
+        if (!req.user?.is_admin) {
             return res.status(403).json({ error: 'Admin access required' });
         }
 
         const { theme } = req.body;
-        await SystemSettings.set('theme', theme, req.user.uid);
+        await SystemSettings.set('theme', theme, req.user.id);
 
         res.json({
             success: true,
@@ -54,8 +54,8 @@ router.put('/theme', async (req, res) => {
  */
 router.get('/all', async (req, res) => {
     try {
-        const user = await User.findById(req.user.uid);
-        if (!user?.is_admin) {
+        // req.user is already the full user object from verifyToken middleware
+        if (!req.user?.is_admin) {
             return res.status(403).json({ error: 'Admin access required' });
         }
 
