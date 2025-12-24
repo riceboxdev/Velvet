@@ -1,42 +1,54 @@
 <script setup lang="ts">
+import type { TableColumn } from '@nuxt/ui'
 import { useWaitlistStore } from '~/stores/waitlist'
 
+// Resolve components for h() render functions
+const UBadge = resolveComponent('UBadge')
+const UButton = resolveComponent('UButton')
+const UDropdownMenu = resolveComponent('UDropdownMenu')
+
+interface Signup {
+  id: string
+  email: string
+  referral_code?: string
+  referral_count: number
+  priority: number
+  status: 'waiting' | 'verified' | 'admitted' | 'offboarded'
+  position: number
+  created_at: any
+}
+
 const store = useWaitlistStore()
+const toast = useToast()
 const currentPage = ref(0)
 const pageSize = 25
 const selectedStatus = ref('')
-const sortBy = ref('position')
-const sortOrder = ref<'ASC' | 'DESC'>('ASC')
 const searchQuery = ref('')
 
 const pagination = ref({ total: 0, hasMore: false })
 
+// Ensure waitlists are loaded
 onMounted(async () => {
-  console.log('[Signups Page] onMounted - currentWaitlist:', store.currentWaitlist?.id)
-  // Ensure waitlists are loaded first
   if (!store.currentWaitlist) {
-    console.log('[Signups Page] No currentWaitlist, fetching all waitlists...')
     await store.fetchAllWaitlists()
-    console.log('[Signups Page] After fetchAllWaitlists - currentWaitlist:', store.currentWaitlist?.id)
   }
   await loadSignups()
 })
 
 async function loadSignups() {
-  console.log('[Signups Page] loadSignups called - currentWaitlist:', store.currentWaitlist?.id)
   const data = await store.fetchSignups({
     limit: pageSize,
     offset: currentPage.value * pageSize,
     status: selectedStatus.value || undefined,
-    sortBy: sortBy.value,
-    order: sortOrder.value
+    sortBy: 'position',
+    order: 'ASC'
   })
 
-  console.log('[Signups Page] fetchSignups returned:', data)
-  console.log('[Signups Page] store.signups:', store.signups)
-
-  if (data?.pagination) {
-    pagination.value = data.pagination
+  if (data?.data) {
+    pagination.value = {
+      total: data.data.total || 0,
+      hasMore: (currentPage.value + 1) * pageSize < (data.data.total || 0)
+    }
   }
 }
 
@@ -50,50 +62,9 @@ const filteredSignups = computed(() => {
   )
 })
 
-async function changePage(delta: number) {
-  currentPage.value += delta
-  await loadSignups()
-}
-
-async function changeSort(field: string) {
-  if (sortBy.value === field) {
-    sortOrder.value = sortOrder.value === 'ASC' ? 'DESC' : 'ASC'
-  } else {
-    sortBy.value = field
-    sortOrder.value = 'ASC'
-  }
-  currentPage.value = 0
-  await loadSignups()
-}
-
-async function handleOffboard(signup: any) {
-  // eslint-disable-next-line no-alert
-  if (confirm(`Admit ${signup.email} from the waitlist?`)) {
-    try {
-      await store.offboardSignup(signup.id)
-    } catch (e: any) {
-      // eslint-disable-next-line no-alert
-      alert('Failed to offboard: ' + e.message)
-    }
-  }
-}
-
-async function handleDelete(signup: any) {
-  // eslint-disable-next-line no-alert
-  if (confirm(`Remove ${signup.email} from the waitlist? This cannot be undone.`)) {
-    try {
-      await store.deleteSignup(signup.id)
-    } catch (e: any) {
-      // eslint-disable-next-line no-alert
-      alert('Failed to delete: ' + e.message)
-    }
-  }
-}
-
 function formatDate(dateInput: any) {
   if (!dateInput) return '-'
   
-  // Handle Firestore timestamp objects
   let date: Date
   if (dateInput._seconds !== undefined) {
     date = new Date(dateInput._seconds * 1000)
@@ -118,13 +89,130 @@ function copyReferralLink(code: string) {
   const waitlistId = store.currentWaitlist?.id || 'preview'
   const link = `${window.location.origin}/join/${waitlistId}?ref=${code}`
   navigator.clipboard.writeText(link)
+  toast.add({
+    title: 'Copied!',
+    description: 'Referral link copied to clipboard'
+  })
 }
 
-const statusColors: Record<string, 'warning' | 'info' | 'success' | 'neutral'> = {
-  waiting: 'warning',
-  verified: 'info',
-  admitted: 'success',
-  offboarded: 'neutral'
+async function handleOffboard(signup: Signup) {
+  if (confirm(`Admit ${signup.email} from the waitlist?`)) {
+    try {
+      await store.offboardSignup(signup.id)
+      toast.add({ title: 'User admitted', color: 'success' })
+    } catch (e: any) {
+      toast.add({ title: 'Failed to admit', description: e.message, color: 'error' })
+    }
+  }
+}
+
+async function handleDelete(signup: Signup) {
+  if (confirm(`Remove ${signup.email} from the waitlist? This cannot be undone.`)) {
+    try {
+      await store.deleteSignup(signup.id)
+      toast.add({ title: 'User removed', color: 'success' })
+    } catch (e: any) {
+      toast.add({ title: 'Failed to delete', description: e.message, color: 'error' })
+    }
+  }
+}
+
+function getRowActions(signup: Signup) {
+  const items = []
+  
+  if (signup.status !== 'admitted') {
+    items.push({
+      label: 'Admit user',
+      icon: 'i-lucide-user-check',
+      onSelect: () => handleOffboard(signup)
+    })
+  }
+  
+  items.push({
+    label: 'Copy referral link',
+    icon: 'i-lucide-copy',
+    onSelect: () => copyReferralLink(signup.referral_code || '')
+  })
+  
+  items.push({ type: 'separator' as const })
+  
+  items.push({
+    label: 'Delete',
+    icon: 'i-lucide-trash',
+    color: 'error' as const,
+    onSelect: () => handleDelete(signup)
+  })
+  
+  return items
+}
+
+const columns: TableColumn<Signup>[] = [
+  {
+    accessorKey: 'position',
+    header: 'Position',
+    cell: ({ row }) => h(UBadge, { color: 'neutral', variant: 'subtle' }, () => `#${row.original.position}`)
+  },
+  {
+    accessorKey: 'email',
+    header: 'Email'
+  },
+  {
+    accessorKey: 'referral_code',
+    header: 'Referral Code',
+    cell: ({ row }) => row.original.referral_code || '-'
+  },
+  {
+    accessorKey: 'referral_count',
+    header: 'Referrals',
+    cell: ({ row }) => h('div', { class: 'flex items-center gap-1.5' }, [
+      h('span', { class: 'i-lucide-share-2 size-3.5 text-muted' }),
+      String(row.original.referral_count || 0)
+    ])
+  },
+  {
+    accessorKey: 'priority',
+    header: 'Priority'
+  },
+  {
+    accessorKey: 'status',
+    header: 'Status',
+    cell: ({ row }) => {
+      const colors: Record<string, 'warning' | 'info' | 'success' | 'neutral'> = {
+        waiting: 'warning',
+        verified: 'info',
+        admitted: 'success',
+        offboarded: 'neutral'
+      }
+      return h(UBadge, { 
+        color: colors[row.original.status] || 'neutral', 
+        variant: 'subtle',
+        class: 'capitalize'
+      }, () => row.original.status)
+    }
+  },
+  {
+    accessorKey: 'created_at',
+    header: 'Joined',
+    cell: ({ row }) => h('span', { class: 'text-muted text-sm' }, formatDate(row.original.created_at))
+  },
+  {
+    id: 'actions',
+    cell: ({ row }) => h('div', { class: 'text-right' }, 
+      h(UDropdownMenu, {
+        content: { align: 'end' },
+        items: getRowActions(row.original)
+      }, () => h(UButton, {
+        icon: 'i-lucide-ellipsis-vertical',
+        color: 'neutral',
+        variant: 'ghost'
+      }))
+    )
+  }
+]
+
+async function changePage(delta: number) {
+  currentPage.value += delta
+  await loadSignups()
 }
 
 const statusOptions = [
@@ -144,187 +232,68 @@ const statusOptions = [
         </template>
 
         <template #right>
-          <USelectMenu
+          <USelect
             v-model="selectedStatus"
             :items="statusOptions"
-            value-key="value"
             class="w-36"
             @update:model-value="loadSignups"
           />
         </template>
       </UDashboardNavbar>
-
-      <UDashboardToolbar>
-        <template #left>
-          <UInput
-            v-model="searchQuery"
-            icon="i-lucide-search"
-            placeholder="Search by email or referral code..."
-            class="w-80"
-          />
-        </template>
-      </UDashboardToolbar>
     </template>
 
     <template #body>
-      <UCard :ui="{ body: 'p-0' }">
-        <div v-if="store.loading" class="p-16 text-center text-dimmed">
-          <UIcon name="i-lucide-loader-2" class="size-8 animate-spin mx-auto mb-3" />
-          Loading signups...
-        </div>
+      <div class="flex flex-wrap items-center justify-between gap-1.5 mb-4">
+        <UInput
+          v-model="searchQuery"
+          class="max-w-sm"
+          icon="i-lucide-search"
+          placeholder="Filter by email..."
+        />
+      </div>
 
-        <div v-else-if="filteredSignups.length === 0" class="p-16 text-center text-dimmed">
-          <UIcon name="i-lucide-inbox" class="size-12 mx-auto mb-4 opacity-50" />
-          <p>No signups found</p>
-        </div>
+      <UTable
+        :data="filteredSignups"
+        :columns="columns"
+        :loading="store.loading"
+        :ui="{
+          base: 'table-fixed border-separate border-spacing-0',
+          thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
+          tbody: '[&>tr]:last:[&>td]:border-b-0',
+          th: 'py-2 first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
+          td: 'border-b border-default py-3'
+        }"
+      />
 
-        <template v-else>
-          <UTable
-            :data="filteredSignups"
-            :columns="[
-              { key: 'position', label: 'Position', sortable: true },
-              { key: 'email', label: 'Email' },
-              { key: 'referral_code', label: 'Referral Code' },
-              { key: 'referral_count', label: 'Referrals', sortable: true },
-              { key: 'priority', label: 'Priority' },
-              { key: 'status', label: 'Status' },
-              { key: 'created_at', label: 'Joined', sortable: true },
-              { key: 'actions', label: 'Actions' }
-            ]"
-            :ui="{ td: 'py-3' }"
+      <!-- Pagination -->
+      <div class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-4">
+        <div class="text-sm text-muted">
+          Showing {{ currentPage * pageSize + 1 }}-{{ Math.min((currentPage + 1) * pageSize, pagination.total) }}
+          of {{ pagination.total }}
+        </div>
+        <div class="flex items-center gap-1.5">
+          <UButton
+            color="neutral"
+            variant="outline"
+            size="sm"
+            icon="i-lucide-chevron-left"
+            :disabled="currentPage === 0"
+            @click="changePage(-1)"
           >
-            <template #position-header>
-              <button
-                class="flex items-center gap-1 hover:text-foreground"
-                @click="changeSort('position')"
-              >
-                Position
-                <UIcon
-                  v-if="sortBy === 'position'"
-                  :name="sortOrder === 'ASC' ? 'i-lucide-arrow-up' : 'i-lucide-arrow-down'"
-                  class="size-3.5"
-                />
-              </button>
-            </template>
-            <template #position-cell="{ row }">
-              <UBadge color="neutral" variant="subtle">#{{ row.original.position }}</UBadge>
-            </template>
-
-            <template #referral_code-cell="{ row }">
-              <UButton
-                variant="ghost"
-                color="neutral"
-                size="xs"
-                @click="copyReferralLink(row.original.referral_code)"
-              >
-                {{ row.original.referral_code }}
-                <UIcon name="i-lucide-copy" class="size-3" />
-              </UButton>
-            </template>
-
-            <template #referral_count-header>
-              <button
-                class="flex items-center gap-1 hover:text-foreground"
-                @click="changeSort('referral_count')"
-              >
-                Referrals
-                <UIcon
-                  v-if="sortBy === 'referral_count'"
-                  :name="sortOrder === 'ASC' ? 'i-lucide-arrow-up' : 'i-lucide-arrow-down'"
-                  class="size-3.5"
-                />
-              </button>
-            </template>
-            <template #referral_count-cell="{ row }">
-              <div class="flex items-center gap-1.5">
-                <UIcon name="i-lucide-share-2" class="size-3.5 text-dimmed" />
-                {{ row.original.referral_count }}
-              </div>
-            </template>
-
-            <template #status-cell="{ row }">
-              <UBadge
-                :color="statusColors[row.original.status] || 'neutral'"
-                variant="subtle"
-              >
-                {{ row.original.status }}
-              </UBadge>
-            </template>
-
-            <template #created_at-header>
-              <button
-                class="flex items-center gap-1 hover:text-foreground"
-                @click="changeSort('created_at')"
-              >
-                Joined
-                <UIcon
-                  v-if="sortBy === 'created_at'"
-                  :name="sortOrder === 'ASC' ? 'i-lucide-arrow-up' : 'i-lucide-arrow-down'"
-                  class="size-3.5"
-                />
-              </button>
-            </template>
-            <template #created_at-cell="{ row }">
-              <span class="text-dimmed text-sm">
-                {{ formatDate(row.original.created_at) }}
-              </span>
-            </template>
-
-            <template #actions-cell="{ row }">
-              <div class="flex gap-1">
-                <UTooltip v-if="row.original.status !== 'admitted'" text="Admit user">
-                  <UButton
-                    icon="i-lucide-user-check"
-                    color="success"
-                    variant="ghost"
-                    size="xs"
-                    @click="handleOffboard(row.original)"
-                  />
-                </UTooltip>
-                <UTooltip text="Delete">
-                  <UButton
-                    icon="i-lucide-trash-2"
-                    color="error"
-                    variant="ghost"
-                    size="xs"
-                    @click="handleDelete(row.original)"
-                  />
-                </UTooltip>
-              </div>
-            </template>
-          </UTable>
-
-          <!-- Pagination -->
-          <div class="flex items-center justify-between px-4 py-4 border-t border-default">
-            <span class="text-sm text-dimmed">
-              Showing {{ currentPage * pageSize + 1 }}-{{ Math.min((currentPage + 1) * pageSize, pagination.total) }}
-              of {{ pagination.total }}
-            </span>
-            <div class="flex gap-2">
-              <UButton
-                color="neutral"
-                variant="outline"
-                size="sm"
-                icon="i-lucide-chevron-left"
-                :disabled="currentPage === 0"
-                @click="changePage(-1)"
-              >
-                Previous
-              </UButton>
-              <UButton
-                color="neutral"
-                variant="outline"
-                size="sm"
-                trailing-icon="i-lucide-chevron-right"
-                :disabled="!pagination.hasMore"
-                @click="changePage(1)"
-              >
-                Next
-              </UButton>
-            </div>
-          </div>
-        </template>
-      </UCard>
+            Previous
+          </UButton>
+          <UButton
+            color="neutral"
+            variant="outline"
+            size="sm"
+            trailing-icon="i-lucide-chevron-right"
+            :disabled="!pagination.hasMore"
+            @click="changePage(1)"
+          >
+            Next
+          </UButton>
+        </div>
+      </div>
     </template>
   </UDashboardPanel>
 </template>
