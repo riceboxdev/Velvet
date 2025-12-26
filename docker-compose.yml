@@ -1,0 +1,68 @@
+# Velvet Docker Compose for Dokploy
+# Deploy via Dokploy UI: Create Docker Compose → Point to GitHub repo
+
+services:
+  # Express API Server
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: velvet-api
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3002
+      # These are set via Dokploy Environment tab:
+      # - FIREBASE_SERVICE_ACCOUNT
+      # - CORS_ORIGIN
+      # - STRIPE_SECRET_KEY
+      # - SENDGRID_API_KEY
+    expose:
+      - "3002"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.velvet-api.rule=Host(`api.velvetapi.com`)"
+      - "traefik.http.routers.velvet-api.entrypoints=websecure"
+      - "traefik.http.routers.velvet-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.velvet-api.loadbalancer.server.port=3002"
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3002/health" ]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  # Nuxt SSR Frontend
+  web:
+    build:
+      context: ./client-nuxt
+      dockerfile: Dockerfile
+    container_name: velvet-web
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - NITRO_PORT=3000
+      # These are set via Dokploy Environment tab:
+      # - NUXT_PUBLIC_API_HOST=https://api.velvetapi.com
+      # - NUXT_PUBLIC_FIREBASE_API_KEY
+      # - NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+      # - NUXT_PUBLIC_FIREBASE_PROJECT_ID
+      # - NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+      # - NUXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+      # - NUXT_PUBLIC_FIREBASE_APP_ID
+    expose:
+      - "3000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.velvet-web.rule=Host(`velvetapi.com`) || Host(`www.velvetapi.com`)"
+      - "traefik.http.routers.velvet-web.entrypoints=websecure"
+      - "traefik.http.routers.velvet-web.tls.certresolver=letsencrypt"
+      - "traefik.http.services.velvet-web.loadbalancer.server.port=3000"
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000" ]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 15s
+    depends_on:
+      - api
