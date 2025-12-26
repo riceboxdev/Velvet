@@ -34,9 +34,6 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key']
 }));
 
-// Explicitly handle preflight requests
-app.options('*', cors());
-
 app.use(express.json());
 
 // Request logging
