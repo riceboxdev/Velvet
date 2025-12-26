@@ -17,6 +17,7 @@ const allowedOrigins = [
     process.env.CORS_ORIGIN
 ].filter(Boolean);
 
+// CORS configuration
 app.use(cors({
     origin: function (origin, callback) {
         // Allow requests with no origin (like mobile apps or curl)
@@ -24,11 +25,18 @@ app.use(cors({
         if (allowedOrigins.includes(origin) || process.env.CORS_ORIGIN === '*') {
             callback(null, true);
         } else {
+            console.log(`[CORS] Blocked origin: ${origin}`);
             callback(new Error('Not allowed by CORS'));
         }
     },
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key']
 }));
+
+// Explicitly handle preflight requests
+app.options('*', cors());
+
 app.use(express.json());
 
 // Request logging
