@@ -1,49 +1,101 @@
-const { db } = require('../config/database');
-const { FieldValue } = require('firebase-admin/firestore');
+const { supabase } = require('../config/supabase');
 
-const SETTINGS_COLLECTION = 'system_settings';
+const TABLE = 'system_settings';
 
 class SystemSettings {
     /**
      * Get a setting by key
      */
     static async get(key) {
-        const doc = await db.collection(SETTINGS_COLLECTION).doc(key).get();
-        if (!doc.exists) return null;
-        return doc.data().value;
+        const { data, error } = await supabase
+            .from(TABLE)
+            .select('settings')
+            .eq('id', 'global')
+            .single();
+
+        if (error && error.code !== 'PGRST116') {
+            console.error('[SystemSettings.get] Error:', error);
+            throw error;
+        }
+
+        if (!data || !data.settings) return null;
+        return data.settings[key] || null;
     }
 
     /**
      * Set a setting
      */
     static async set(key, value, updatedBy = null) {
-        const data = {
-            value: typeof value === 'object' ? JSON.stringify(value) : value,
-            updated_at: FieldValue.serverTimestamp(),
-            updated_by: updatedBy
-        };
+        // Get current settings
+        const { data: existing } = await supabase
+            .from(TABLE)
+            .select('settings')
+            .eq('id', 'global')
+            .single();
 
-        await db.collection(SETTINGS_COLLECTION).doc(key).set(data, { merge: true });
-        return this.get(key);
+        const currentSettings = existing?.settings || {};
+        currentSettings[key] = value;
+
+        const { error } = await supabase
+            .from(TABLE)
+            .upsert({
+                id: 'global',
+                settings: currentSettings,
+                updated_by: updatedBy
+            });
+
+        if (error) {
+            console.error('[SystemSettings.set] Error:', error);
+            throw error;
+        }
+
+        return value;
     }
 
     /**
      * Get all settings
      */
     static async getAll() {
-        const snapshot = await db.collection(SETTINGS_COLLECTION).get();
-        const settings = {};
-        snapshot.docs.forEach(doc => {
-            settings[doc.id] = doc.data().value;
-        });
-        return settings;
+        const { data, error } = await supabase
+            .from(TABLE)
+            .select('settings')
+            .eq('id', 'global')
+            .single();
+
+        if (error && error.code !== 'PGRST116') {
+            console.error('[SystemSettings.getAll] Error:', error);
+            throw error;
+        }
+
+        return data?.settings || {};
     }
 
     /**
      * Delete a setting
      */
     static async delete(key) {
-        await db.collection(SETTINGS_COLLECTION).doc(key).delete();
+        // Get current settings
+        const { data: existing } = await supabase
+            .from(TABLE)
+            .select('settings')
+            .eq('id', 'global')
+            .single();
+
+        if (!existing?.settings) return true;
+
+        const currentSettings = { ...existing.settings };
+        delete currentSettings[key];
+
+        const { error } = await supabase
+            .from(TABLE)
+            .update({ settings: currentSettings })
+            .eq('id', 'global');
+
+        if (error) {
+            console.error('[SystemSettings.delete] Error:', error);
+            throw error;
+        }
+
         return true;
     }
 }

@@ -1,44 +1,48 @@
-const { db } = require('../config/database');
-const { FieldValue } = require('firebase-admin/firestore');
+const { supabase } = require('../config/supabase');
 const { nanoid } = require('nanoid');
-const Waitlist = require('./Waitlist');
 
-const COLLECTION = 'signups';
+const TABLE = 'signups';
 
 class Signup {
     /**
      * Create a new signup
-     * @param {number} priorityBoost - Priority increase for referrer (defaults to spotsSkippedOnReferral * 10)
      */
-    static async create({ waitlistId, email, referredBy = null, metadata = {}, ipAddress = null, userAgent = null, priorityBoost = 30 }) {
-        const id = nanoid(20);
+    static async create({ waitlistId, email, name = null, referredBy = null, metadata = {}, ipAddress = null, userAgent = null, priorityBoost = 30 }) {
+        const id = `sg_${nanoid(20)}`;
         const referralCode = nanoid(10);
 
         // Get current position (count of existing signups + 1)
-        const countSnapshot = await db.collection(COLLECTION)
-            .where('waitlist_id', '==', waitlistId)
-            .count()
-            .get();
-        const position = countSnapshot.data().count + 1;
+        const { count } = await supabase
+            .from(TABLE)
+            .select('*', { count: 'exact', head: true })
+            .eq('waitlist_id', waitlistId);
 
-        const signupData = {
-            waitlist_id: waitlistId,
-            email: email.toLowerCase().trim(),
-            referral_code: referralCode,
-            referred_by: referredBy,
-            referral_count: 0,
-            priority: 0,
-            position,
-            status: 'waiting',
-            metadata,
-            ip_address: ipAddress,
-            user_agent: userAgent,
-            created_at: FieldValue.serverTimestamp(),
-            verified_at: null,
-            admitted_at: null
-        };
+        const position = (count || 0) + 1;
 
-        await db.collection(COLLECTION).doc(id).set(signupData);
+        const { data, error } = await supabase
+            .from(TABLE)
+            .insert({
+                id,
+                waitlist_id: waitlistId,
+                email: email.toLowerCase().trim(),
+                name,
+                referral_code: referralCode,
+                referred_by: referredBy,
+                referral_count: 0,
+                priority: 0,
+                position,
+                status: 'waiting',
+                metadata,
+                ip_address: ipAddress,
+                user_agent: userAgent
+            })
+            .select()
+            .single();
+
+        if (error) {
+            console.error('[Signup.create] Error:', error);
+            throw error;
+        }
 
         // Update referrer's count and priority if referred
         if (referredBy) {
@@ -46,100 +50,138 @@ class Signup {
         }
 
         // Increment waitlist total
+        const Waitlist = require('./Waitlist');
         await Waitlist.incrementSignups(waitlistId);
 
-        return this.findById(id);
+        return data;
     }
 
     /**
      * Find signup by ID
      */
     static async findById(id) {
-        const doc = await db.collection(COLLECTION).doc(id).get();
-        if (!doc.exists) return null;
-        return { id: doc.id, ...doc.data() };
+        const { data, error } = await supabase
+            .from(TABLE)
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error && error.code !== 'PGRST116') {
+            console.error('[Signup.findById] Error:', error);
+            throw error;
+        }
+
+        return data;
     }
 
     /**
      * Find signup by email within a waitlist
      */
     static async findByEmail(waitlistId, email) {
-        const snapshot = await db.collection(COLLECTION)
-            .where('waitlist_id', '==', waitlistId)
-            .where('email', '==', email.toLowerCase().trim())
-            .limit(1)
-            .get();
+        const { data, error } = await supabase
+            .from(TABLE)
+            .select('*')
+            .eq('waitlist_id', waitlistId)
+            .eq('email', email.toLowerCase().trim())
+            .single();
 
-        if (snapshot.empty) return null;
-        const doc = snapshot.docs[0];
-        return { id: doc.id, ...doc.data() };
+        if (error && error.code !== 'PGRST116') {
+            console.error('[Signup.findByEmail] Error:', error);
+            throw error;
+        }
+
+        return data;
     }
 
     /**
      * Find signup by referral code
      */
     static async findByReferralCode(referralCode) {
-        const snapshot = await db.collection(COLLECTION)
-            .where('referral_code', '==', referralCode)
-            .limit(1)
-            .get();
+        const { data, error } = await supabase
+            .from(TABLE)
+            .select('*')
+            .eq('referral_code', referralCode)
+            .single();
 
-        if (snapshot.empty) return null;
-        const doc = snapshot.docs[0];
-        return { id: doc.id, ...doc.data() };
+        if (error && error.code !== 'PGRST116') {
+            console.error('[Signup.findByReferralCode] Error:', error);
+            throw error;
+        }
+
+        return data;
     }
 
     /**
      * Find signups for a waitlist with pagination and filtering
      */
     static async findByWaitlist(waitlistId, { limit = 100, offset = 0, status = null, sortBy = 'position', order = 'asc' } = {}) {
-        let query = db.collection(COLLECTION)
-            .where('waitlist_id', '==', waitlistId);
+        let query = supabase
+            .from(TABLE)
+            .select('*')
+            .eq('waitlist_id', waitlistId);
 
         if (status) {
-            query = query.where('status', '==', status);
+            query = query.eq('status', status);
         }
 
-        // Use native Firestore ordering (requires composite indexes)
         const validSortFields = ['position', 'created_at', 'referral_count', 'priority'];
         const sortField = validSortFields.includes(sortBy) ? sortBy : 'position';
-        const sortOrder = order.toLowerCase() === 'desc' ? 'desc' : 'asc';
+        const ascending = order.toLowerCase() !== 'desc';
 
-        query = query.orderBy(sortField, sortOrder).limit(limit);
+        query = query
+            .order(sortField, { ascending })
+            .range(offset, offset + limit - 1);
 
-        const snapshot = await query.get();
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const { data, error } = await query;
+
+        if (error) {
+            console.error('[Signup.findByWaitlist] Error:', error);
+            throw error;
+        }
+
+        return data || [];
     }
 
     /**
      * Get leaderboard for a waitlist
      */
     static async getLeaderboard(waitlistId, limit = 10) {
-        const snapshot = await db.collection(COLLECTION)
-            .where('waitlist_id', '==', waitlistId)
-            .where('status', '!=', 'admitted')
-            .orderBy('status')
-            .orderBy('priority', 'desc')
-            .orderBy('referral_count', 'desc')
-            .limit(limit)
-            .get();
+        const { data, error } = await supabase
+            .from(TABLE)
+            .select('*')
+            .eq('waitlist_id', waitlistId)
+            .neq('status', 'admitted')
+            .order('priority', { ascending: false })
+            .order('referral_count', { ascending: false })
+            .limit(limit);
 
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        if (error) {
+            console.error('[Signup.getLeaderboard] Error:', error);
+            throw error;
+        }
+
+        return data || [];
     }
 
     /**
      * Increment referral count for a signup
-     * @param {string} referralCode - The referrer's code
-     * @param {number} priorityBoost - How much to boost priority (default: 10, typically spotsSkippedOnReferral * 10)
      */
     static async incrementReferralCount(referralCode, priorityBoost = 10) {
         const signup = await this.findByReferralCode(referralCode);
         if (!signup) return null;
 
-        await db.collection(COLLECTION).doc(signup.id).update({
-            referral_count: FieldValue.increment(1),
-            priority: FieldValue.increment(priorityBoost)
-        });
+        const { error } = await supabase
+            .from(TABLE)
+            .update({
+                referral_count: signup.referral_count + 1,
+                priority: signup.priority + priorityBoost
+            })
+            .eq('id', signup.id);
+
+        if (error) {
+            console.error('[Signup.incrementReferralCount] Error:', error);
+            throw error;
+        }
 
         return signup;
     }
@@ -148,32 +190,66 @@ class Signup {
      * Verify a signup
      */
     static async verify(id) {
-        await db.collection(COLLECTION).doc(id).update({
-            status: 'verified',
-            verified_at: FieldValue.serverTimestamp()
-        });
-        return this.findById(id);
+        const { data, error } = await supabase
+            .from(TABLE)
+            .update({
+                status: 'verified',
+                verified_at: new Date().toISOString()
+            })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('[Signup.verify] Error:', error);
+            throw error;
+        }
+
+        return data;
     }
 
     /**
      * Admit/offboard a signup
      */
     static async offboard(id) {
-        await db.collection(COLLECTION).doc(id).update({
-            status: 'admitted',
-            admitted_at: FieldValue.serverTimestamp()
-        });
-        return this.findById(id);
+        const { data, error } = await supabase
+            .from(TABLE)
+            .update({
+                status: 'admitted',
+                admitted_at: new Date().toISOString()
+            })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('[Signup.offboard] Error:', error);
+            throw error;
+        }
+
+        return data;
     }
 
     /**
      * Advance priority
      */
     static async advancePriority(id, amount = 100) {
-        await db.collection(COLLECTION).doc(id).update({
-            priority: FieldValue.increment(amount)
-        });
-        return this.findById(id);
+        const signup = await this.findById(id);
+        if (!signup) return null;
+
+        const { data, error } = await supabase
+            .from(TABLE)
+            .update({ priority: signup.priority + amount })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('[Signup.advancePriority] Error:', error);
+            throw error;
+        }
+
+        return data;
     }
 
     /**
@@ -181,10 +257,22 @@ class Signup {
      */
     static async delete(id) {
         const signup = await this.findById(id);
+
+        const { error } = await supabase
+            .from(TABLE)
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error('[Signup.delete] Error:', error);
+            throw error;
+        }
+
         if (signup) {
-            await db.collection(COLLECTION).doc(id).delete();
+            const Waitlist = require('./Waitlist');
             await Waitlist.decrementSignups(signup.waitlist_id);
         }
+
         return true;
     }
 
@@ -195,24 +283,24 @@ class Signup {
         const signup = await this.findByEmail(waitlistId, email);
         if (!signup) return null;
 
-        // Count how many are ahead based on priority/position
-        const aheadSnapshot = await db.collection(COLLECTION)
-            .where('waitlist_id', '==', waitlistId)
-            .where('status', '!=', 'admitted')
-            .where('priority', '>', signup.priority)
-            .count()
-            .get();
+        // Count how many are ahead based on priority
+        const { count: aheadCount } = await supabase
+            .from(TABLE)
+            .select('*', { count: 'exact', head: true })
+            .eq('waitlist_id', waitlistId)
+            .neq('status', 'admitted')
+            .gt('priority', signup.priority);
 
-        // Also count those with same priority but earlier position
-        const samePriorityAheadSnapshot = await db.collection(COLLECTION)
-            .where('waitlist_id', '==', waitlistId)
-            .where('status', '!=', 'admitted')
-            .where('priority', '==', signup.priority)
-            .where('position', '<', signup.position)
-            .count()
-            .get();
+        // Count those with same priority but earlier position
+        const { count: samePriorityCount } = await supabase
+            .from(TABLE)
+            .select('*', { count: 'exact', head: true })
+            .eq('waitlist_id', waitlistId)
+            .neq('status', 'admitted')
+            .eq('priority', signup.priority)
+            .lt('position', signup.position);
 
-        const current_position = aheadSnapshot.data().count + samePriorityAheadSnapshot.data().count + 1;
+        const current_position = (aheadCount || 0) + (samePriorityCount || 0) + 1;
 
         return { ...signup, current_position };
     }
@@ -221,15 +309,23 @@ class Signup {
      * Count signups for a waitlist
      */
     static async count(waitlistId, status = null) {
-        let query = db.collection(COLLECTION)
-            .where('waitlist_id', '==', waitlistId);
+        let query = supabase
+            .from(TABLE)
+            .select('*', { count: 'exact', head: true })
+            .eq('waitlist_id', waitlistId);
 
         if (status) {
-            query = query.where('status', '==', status);
+            query = query.eq('status', status);
         }
 
-        const snapshot = await query.count().get();
-        return snapshot.data().count;
+        const { count, error } = await query;
+
+        if (error) {
+            console.error('[Signup.count] Error:', error);
+            throw error;
+        }
+
+        return count || 0;
     }
 }
 

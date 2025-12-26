@@ -2,8 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
-// Initialize Firebase Admin (must happen before routes)
-require('./config/database');
+// Initialize Supabase (must happen before routes)
+require('./config/supabase');
 
 // Initialize Express app
 const app = express();
@@ -87,7 +87,7 @@ app.use((err, req, res, next) => {
 // Start server
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`\n🚀 Waitlist API server running on http://0.0.0.0:${PORT}`);
-    console.log('[Firebase] Backend using Firestore');
+    console.log('[Supabase] Backend using PostgreSQL + Clerk Auth');
 });
 
 module.exports = app;

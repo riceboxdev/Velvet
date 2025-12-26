@@ -1,8 +1,7 @@
-const { db } = require('../config/database');
-const { FieldValue } = require('firebase-admin/firestore');
+const { supabase } = require('../config/supabase');
 const { nanoid } = require('nanoid');
 
-const COLLECTION = 'waitlists';
+const TABLE = 'waitlists';
 
 /**
  * Default settings schema for a waitlist
@@ -22,7 +21,7 @@ const DEFAULT_SETTINGS = {
     // Collect Info
     requireName: false,
     termsUrl: null,
-    contactType: 'email', // 'email' | 'phone'
+    contactType: 'email',
 
     // Redirection
     redirectOnSubmit: false,
@@ -63,8 +62,8 @@ const DEFAULT_SETTINGS = {
         borderColor: '#cccccc',
         darkMode: false,
         transparent: false,
-        title: '',  // Empty = use waitlist name
-        successTitle: '',  // Empty = use default
+        title: '',
+        successTitle: '',
         successDescription: '',
         signupButtonText: 'Sign Up',
         removeLabels: false,
@@ -94,27 +93,18 @@ const DEFAULT_SETTINGS = {
     // Custom Questions Settings
     questions: {
         hideHeader: false,
-        items: []  // Array of { id, question, answers, optional }
+        items: []
     },
 
     // Connectors
     connectors: {
-        zapier: {
-            enabled: false
-        },
-        webhook: {
-            url: ''
-        },
-        slack: {
-            enabled: false
-        },
-        hubspot: {
-            enabled: false
-        }
+        zapier: { enabled: false },
+        webhook: { url: '' },
+        slack: { enabled: false },
+        hubspot: { enabled: false }
     }
-}
+};
 
-// Common free email domains to block when blockFreeEmails is enabled
 const FREE_EMAIL_DOMAINS = [
     'gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'aol.com',
     'icloud.com', 'mail.com', 'protonmail.com', 'zoho.com', 'yandex.com',
@@ -122,16 +112,10 @@ const FREE_EMAIL_DOMAINS = [
 ];
 
 class Waitlist {
-    /**
-     * Get default settings
-     */
     static getDefaultSettings() {
-        return { ...DEFAULT_SETTINGS };
+        return JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
     }
 
-    /**
-     * Get free email domains list
-     */
     static getFreeEmailDomains() {
         return FREE_EMAIL_DOMAINS;
     }
@@ -144,81 +128,117 @@ class Waitlist {
         const apiKey = `wl_${nanoid(32)}`;
         const zapierApiKey = `zap_${nanoid(32)}`;
 
-        const waitlistData = {
-            user_id: userId,
-            name,
-            description,
-            api_key: apiKey,
-            zapier_api_key: zapierApiKey,
-            settings: { ...DEFAULT_SETTINGS },
-            total_signups: 0,
-            is_active: true,
-            created_at: FieldValue.serverTimestamp(),
-            updated_at: FieldValue.serverTimestamp()
-        };
+        const { data, error } = await supabase
+            .from(TABLE)
+            .insert({
+                id,
+                user_id: userId,
+                name,
+                description,
+                api_key: apiKey,
+                zapier_api_key: zapierApiKey,
+                settings: DEFAULT_SETTINGS,
+                total_signups: 0,
+                is_active: true
+            })
+            .select()
+            .single();
 
-        await db.collection(COLLECTION).doc(id).set(waitlistData);
-        return this.findById(id);
+        if (error) {
+            console.error('[Waitlist.create] Error:', error);
+            throw error;
+        }
+
+        return data;
     }
 
     /**
      * Find waitlist by ID
      */
     static async findById(id) {
-        const doc = await db.collection(COLLECTION).doc(id).get();
-        if (!doc.exists) return null;
-        return { id: doc.id, ...doc.data() };
+        const { data, error } = await supabase
+            .from(TABLE)
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error && error.code !== 'PGRST116') {
+            console.error('[Waitlist.findById] Error:', error);
+            throw error;
+        }
+
+        return data;
     }
 
     /**
      * Find waitlist by API key
      */
     static async findByApiKey(apiKey) {
-        const snapshot = await db.collection(COLLECTION)
-            .where('api_key', '==', apiKey)
-            .limit(1)
-            .get();
+        const { data, error } = await supabase
+            .from(TABLE)
+            .select('*')
+            .eq('api_key', apiKey)
+            .single();
 
-        if (snapshot.empty) return null;
-        const doc = snapshot.docs[0];
-        return { id: doc.id, ...doc.data() };
+        if (error && error.code !== 'PGRST116') {
+            console.error('[Waitlist.findByApiKey] Error:', error);
+            throw error;
+        }
+
+        return data;
     }
 
     /**
      * Find waitlist by Zapier API key
      */
     static async findByZapierApiKey(zapierApiKey) {
-        const snapshot = await db.collection(COLLECTION)
-            .where('zapier_api_key', '==', zapierApiKey)
-            .limit(1)
-            .get();
+        const { data, error } = await supabase
+            .from(TABLE)
+            .select('*')
+            .eq('zapier_api_key', zapierApiKey)
+            .single();
 
-        if (snapshot.empty) return null;
-        const doc = snapshot.docs[0];
-        return { id: doc.id, ...doc.data() };
+        if (error && error.code !== 'PGRST116') {
+            console.error('[Waitlist.findByZapierApiKey] Error:', error);
+            throw error;
+        }
+
+        return data;
     }
 
     /**
      * Find all waitlists for a user
      */
     static async findByUserId(userId) {
-        const snapshot = await db.collection(COLLECTION)
-            .where('user_id', '==', userId)
-            .orderBy('created_at', 'desc')
-            .get();
+        const { data, error } = await supabase
+            .from(TABLE)
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false });
 
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        if (error) {
+            console.error('[Waitlist.findByUserId] Error:', error);
+            throw error;
+        }
+
+        return data || [];
     }
 
     /**
      * Find all waitlists
      */
     static async findAll() {
-        const snapshot = await db.collection(COLLECTION)
-            .orderBy('created_at', 'desc')
-            .get();
+        const { data, error } = await supabase
+            .from(TABLE)
+            .select('*')
+            .order('created_at', { ascending: false });
 
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        if (error) {
+            console.error('[Waitlist.findAll] Error:', error);
+            throw error;
+        }
+
+        return data || [];
     }
 
     /**
@@ -226,7 +246,7 @@ class Waitlist {
      */
     static async update(id, updates) {
         const allowedFields = ['name', 'description', 'settings', 'is_active'];
-        const updateData = { updated_at: FieldValue.serverTimestamp() };
+        const updateData = {};
 
         // Get existing waitlist to merge settings
         const existing = await this.findById(id);
@@ -235,7 +255,6 @@ class Waitlist {
         for (const [key, value] of Object.entries(updates)) {
             if (allowedFields.includes(key)) {
                 if (key === 'settings' && value && existing.settings) {
-                    // Deep merge settings to preserve existing values
                     updateData[key] = this.deepMerge(existing.settings, value);
                 } else {
                     updateData[key] = value;
@@ -243,8 +262,19 @@ class Waitlist {
             }
         }
 
-        await db.collection(COLLECTION).doc(id).update(updateData);
-        return this.findById(id);
+        const { data, error } = await supabase
+            .from(TABLE)
+            .update(updateData)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('[Waitlist.update] Error:', error);
+            throw error;
+        }
+
+        return data;
     }
 
     /**
@@ -263,19 +293,19 @@ class Waitlist {
     }
 
     /**
-     * Delete waitlist
+     * Delete waitlist (cascades to signups via FK)
      */
     static async delete(id) {
-        // Also delete all signups for this waitlist
-        const signupsSnapshot = await db.collection('signups')
-            .where('waitlist_id', '==', id)
-            .get();
+        const { error } = await supabase
+            .from(TABLE)
+            .delete()
+            .eq('id', id);
 
-        const batch = db.batch();
-        signupsSnapshot.docs.forEach(doc => batch.delete(doc.ref));
-        batch.delete(db.collection(COLLECTION).doc(id));
+        if (error) {
+            console.error('[Waitlist.delete] Error:', error);
+            throw error;
+        }
 
-        await batch.commit();
         return true;
     }
 
@@ -283,11 +313,17 @@ class Waitlist {
      * Get waitlist statistics
      */
     static async getStats(id) {
-        const signupsSnapshot = await db.collection('signups')
-            .where('waitlist_id', '==', id)
-            .get();
+        const { data, error } = await supabase
+            .from('signups')
+            .select('status, referral_count')
+            .eq('waitlist_id', id);
 
-        let stats = {
+        if (error) {
+            console.error('[Waitlist.getStats] Error:', error);
+            throw error;
+        }
+
+        const stats = {
             total_signups: 0,
             waiting: 0,
             verified: 0,
@@ -295,13 +331,12 @@ class Waitlist {
             total_referrals: 0
         };
 
-        signupsSnapshot.docs.forEach(doc => {
-            const data = doc.data();
+        (data || []).forEach(signup => {
             stats.total_signups++;
-            if (data.status === 'waiting') stats.waiting++;
-            if (data.status === 'verified') stats.verified++;
-            if (data.status === 'admitted') stats.admitted++;
-            stats.total_referrals += data.referral_count || 0;
+            if (signup.status === 'waiting') stats.waiting++;
+            if (signup.status === 'verified') stats.verified++;
+            if (signup.status === 'admitted') stats.admitted++;
+            stats.total_referrals += signup.referral_count || 0;
         });
 
         return stats;
@@ -311,18 +346,31 @@ class Waitlist {
      * Increment total signups count
      */
     static async incrementSignups(id) {
-        await db.collection(COLLECTION).doc(id).update({
-            total_signups: FieldValue.increment(1)
-        });
+        const { error } = await supabase.rpc('increment_waitlist_signups', { waitlist_id: id });
+
+        // Fallback if RPC doesn't exist
+        if (error) {
+            const waitlist = await this.findById(id);
+            if (waitlist) {
+                await supabase
+                    .from(TABLE)
+                    .update({ total_signups: (waitlist.total_signups || 0) + 1 })
+                    .eq('id', id);
+            }
+        }
     }
 
     /**
      * Decrement total signups count
      */
     static async decrementSignups(id) {
-        await db.collection(COLLECTION).doc(id).update({
-            total_signups: FieldValue.increment(-1)
-        });
+        const waitlist = await this.findById(id);
+        if (waitlist && waitlist.total_signups > 0) {
+            await supabase
+                .from(TABLE)
+                .update({ total_signups: waitlist.total_signups - 1 })
+                .eq('id', id);
+        }
     }
 
     /**
@@ -330,11 +378,20 @@ class Waitlist {
      */
     static async regenerateApiKey(id) {
         const newApiKey = `wl_${nanoid(32)}`;
-        await db.collection(COLLECTION).doc(id).update({
-            api_key: newApiKey,
-            updated_at: FieldValue.serverTimestamp()
-        });
-        return this.findById(id);
+
+        const { data, error } = await supabase
+            .from(TABLE)
+            .update({ api_key: newApiKey })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('[Waitlist.regenerateApiKey] Error:', error);
+            throw error;
+        }
+
+        return data;
     }
 
     /**
@@ -342,11 +399,20 @@ class Waitlist {
      */
     static async regenerateZapierKey(id) {
         const newZapierKey = `zap_${nanoid(32)}`;
-        await db.collection(COLLECTION).doc(id).update({
-            zapier_api_key: newZapierKey,
-            updated_at: FieldValue.serverTimestamp()
-        });
-        return this.findById(id);
+
+        const { data, error } = await supabase
+            .from(TABLE)
+            .update({ zapier_api_key: newZapierKey })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('[Waitlist.regenerateZapierKey] Error:', error);
+            throw error;
+        }
+
+        return data;
     }
 }
 

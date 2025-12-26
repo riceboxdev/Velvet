@@ -2,16 +2,16 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const Subscription = require('../models/Subscription');
-const { authenticateToken, verifyToken } = require('../middleware/auth');
+const { authenticateToken, verifyToken } = require('../middleware/clerk');
 
 /**
  * POST /api/auth/create-user
- * Create user document after Firebase Auth signup (called from client)
+ * Create user document after Clerk signup (called from client)
  */
 router.post('/create-user', verifyToken, async (req, res) => {
     try {
-        const { name = '' } = req.body;
-        const decodedToken = req.auth; // From middleware
+        const { name = '', email } = req.body;
+        const { userId } = req.auth; // From Clerk middleware
 
         // Check if user already exists
         let user = req.user; // From middleware
@@ -19,11 +19,11 @@ router.post('/create-user', verifyToken, async (req, res) => {
         if (!user) {
             // Create new user document
             user = await User.create({
-                uid: decodedToken.uid,
-                email: decodedToken.email,
+                id: userId,
+                email: email,
                 name
             });
-            console.log(`[Auth] New user created: ${decodedToken.email}`);
+            console.log(`[Auth] New user created: ${email}`);
         }
 
         res.status(201).json({
@@ -44,22 +44,23 @@ router.get('/me', verifyToken, async (req, res) => {
     try {
         // User might be null if not created yet
         let user = req.user;
-        const decodedToken = req.auth;
+        const { userId } = req.auth;
 
         if (!user) {
-            // Auto-create user document if it doesn't exist
-            user = await User.create({
-                uid: decodedToken.uid,
-                email: decodedToken.email,
-                name: ''
+            // We need the email from the request or Clerk
+            // For now, return null and let the client create the user
+            return res.status(404).json({
+                success: false,
+                error: 'User not found',
+                message: 'User document does not exist. Please call /create-user first.'
             });
         }
 
         // Update last login
-        await User.updateLastLogin(decodedToken.uid);
+        await User.updateLastLogin(userId);
 
         // Get subscription info (plan + limits)
-        const subscription = await Subscription.getUserLimits(decodedToken.uid);
+        const subscription = await Subscription.getUserLimits(userId);
 
         res.json({
             success: true,
@@ -82,9 +83,9 @@ router.get('/me', verifyToken, async (req, res) => {
 router.put('/profile', authenticateToken, async (req, res) => {
     try {
         const { name, email, bio, website, company, photo_url } = req.body;
-        const decodedToken = req.auth;
+        const { userId } = req.auth;
 
-        const user = await User.update(decodedToken.uid, {
+        const user = await User.update(userId, {
             name,
             email,
             bio,

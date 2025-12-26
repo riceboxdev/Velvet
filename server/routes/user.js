@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { authenticateToken, validateWaitlistOwnership } = require('../middleware/auth');
+const { authenticateToken, validateWaitlistOwnership } = require('../middleware/clerk');
 const Waitlist = require('../models/Waitlist');
 const Signup = require('../models/Signup');
 const Webhook = require('../models/Webhook');

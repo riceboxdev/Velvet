@@ -23,12 +23,11 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: '',
-      firebaseApiKey: '',
-      firebaseAuthDomain: '',
-      firebaseProjectId: '',
-      firebaseStorageBucket: '',
-      firebaseMessagingSenderId: '',
-      firebaseAppId: ''
+      // Clerk
+      clerkPublishableKey: '',
+      // Supabase
+      supabaseUrl: '',
+      supabaseAnonKey: ''
     }
   },
 
@@ -44,14 +43,5 @@ export default defineNuxtConfig({
     }
   },
 
-  compatibilityDate: '2024-07-11',
-
-  //   eslint: {
-  //     config: {
-  //       stylistic: {
-  //         commaDangle: 'never',
-  //         braceStyle: '1tbs'
-  //       }
-  //     }
-  //   }
+  compatibilityDate: '2024-07-11'
 })

@@ -1,8 +1,7 @@
-const { db } = require('../config/database');
-const { FieldValue } = require('firebase-admin/firestore');
+const { supabase } = require('../config/supabase');
 const { nanoid } = require('nanoid');
 
-const COLLECTION = 'zapier_hooks';
+const TABLE = 'zapier_hooks';
 
 /**
  * Valid Zapier event types
@@ -25,51 +24,80 @@ class ZapierHook {
             throw new Error(`Invalid event type. Must be one of: ${ZAPIER_EVENTS.join(', ')}`);
         }
 
-        const id = nanoid(20);
+        const id = `zh_${nanoid(20)}`;
 
-        const hookData = {
-            waitlist_id: waitlistId,
-            hook_url: hookUrl,
-            event,
-            is_active: true,
-            created_at: FieldValue.serverTimestamp()
-        };
+        const { data, error } = await supabase
+            .from(TABLE)
+            .insert({
+                id,
+                waitlist_id: waitlistId,
+                hook_url: hookUrl,
+                event_type: event,
+                is_active: true
+            })
+            .select()
+            .single();
 
-        await db.collection(COLLECTION).doc(id).set(hookData);
-        return this.findById(id);
+        if (error) {
+            console.error('[ZapierHook.create] Error:', error);
+            throw error;
+        }
+
+        return data;
     }
 
     /**
      * Find hook by ID
      */
     static async findById(id) {
-        const doc = await db.collection(COLLECTION).doc(id).get();
-        if (!doc.exists) return null;
-        return { id: doc.id, ...doc.data() };
+        const { data, error } = await supabase
+            .from(TABLE)
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error && error.code !== 'PGRST116') {
+            console.error('[ZapierHook.findById] Error:', error);
+            throw error;
+        }
+
+        return data;
     }
 
     /**
      * Find all hooks for a waitlist
      */
     static async findByWaitlistId(waitlistId) {
-        const snapshot = await db.collection(COLLECTION)
-            .where('waitlist_id', '==', waitlistId)
-            .get();
+        const { data, error } = await supabase
+            .from(TABLE)
+            .select('*')
+            .eq('waitlist_id', waitlistId);
 
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        if (error) {
+            console.error('[ZapierHook.findByWaitlistId] Error:', error);
+            throw error;
+        }
+
+        return data || [];
     }
 
     /**
      * Find active hooks for a specific event
      */
     static async findActiveByEvent(waitlistId, event) {
-        const snapshot = await db.collection(COLLECTION)
-            .where('waitlist_id', '==', waitlistId)
-            .where('event', '==', event)
-            .where('is_active', '==', true)
-            .get();
+        const { data, error } = await supabase
+            .from(TABLE)
+            .select('*')
+            .eq('waitlist_id', waitlistId)
+            .eq('event_type', event)
+            .eq('is_active', true);
 
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        if (error) {
+            console.error('[ZapierHook.findActiveByEvent] Error:', error);
+            throw error;
+        }
+
+        return data || [];
     }
 
     /**
@@ -85,17 +113,39 @@ class ZapierHook {
             }
         }
 
-        if (Object.keys(updateData).length > 0) {
-            await db.collection(COLLECTION).doc(id).update(updateData);
+        if (Object.keys(updateData).length === 0) {
+            return this.findById(id);
         }
-        return this.findById(id);
+
+        const { data, error } = await supabase
+            .from(TABLE)
+            .update(updateData)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('[ZapierHook.update] Error:', error);
+            throw error;
+        }
+
+        return data;
     }
 
     /**
      * Delete hook
      */
     static async delete(id) {
-        await db.collection(COLLECTION).doc(id).delete();
+        const { error } = await supabase
+            .from(TABLE)
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error('[ZapierHook.delete] Error:', error);
+            throw error;
+        }
+
         return true;
     }
 
@@ -103,14 +153,16 @@ class ZapierHook {
      * Delete all hooks for a waitlist
      */
     static async deleteByWaitlistId(waitlistId) {
-        const hooks = await this.findByWaitlistId(waitlistId);
-        const batch = db.batch();
+        const { error } = await supabase
+            .from(TABLE)
+            .delete()
+            .eq('waitlist_id', waitlistId);
 
-        hooks.forEach(hook => {
-            batch.delete(db.collection(COLLECTION).doc(hook.id));
-        });
+        if (error) {
+            console.error('[ZapierHook.deleteByWaitlistId] Error:', error);
+            throw error;
+        }
 
-        await batch.commit();
         return true;
     }
 }

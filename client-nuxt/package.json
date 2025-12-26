@@ -17,14 +17,15 @@
     "@nuxt/image": "^2.0.0",
     "@nuxt/ui": "^4.3.0",
     "@pinia/nuxt": "^0.11.3",
+    "@supabase/supabase-js": "^2.52.3",
     "@unovis/ts": "^1.6.2",
     "@unovis/vue": "^1.6.2",
     "@vueuse/nuxt": "^14.1.0",
     "better-sqlite3": "^12.5.0",
     "date-fns": "^4.1.0",
-    "firebase": "^12.7.0",
     "nuxt": "^4.2.2",
     "pinia": "^3.0.4",
+    "vue-clerk": "^5.15.0",
     "zod": "^4.2.1"
   },
   "devDependencies": {

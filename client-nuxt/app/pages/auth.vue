@@ -1,58 +1,29 @@
 <script setup lang="ts">
-import { useAuthStore } from '~/stores/auth'
+import { SignIn, SignUp, useAuth } from 'vue-clerk'
 
 definePageMeta({
   layout: 'auth'
 })
 
 const router = useRouter()
-const authStore = useAuthStore()
+const { isSignedIn } = useAuth()
 
 const isLogin = ref(true)
-const email = ref('')
-const password = ref('')
-const name = ref('')
-const loading = ref(false)
-const error = ref('')
 
-async function handleSubmit() {
-  error.value = ''
-
-  if (!email.value || !password.value) {
-    error.value = 'Please fill in all required fields'
-    return
-  }
-
-  if (!isLogin.value && password.value.length < 8) {
-    error.value = 'Password must be at least 8 characters'
-    return
-  }
-
-  loading.value = true
-
-  try {
-    if (isLogin.value) {
-      await authStore.login(email.value, password.value)
-    } else {
-      await authStore.signup(email.value, password.value, name.value)
-    }
-
+// Redirect if already signed in
+watch(isSignedIn, (signedIn) => {
+  if (signedIn) {
     router.push('/')
-  } catch (e: any) {
-    error.value = e.message
-  } finally {
-    loading.value = false
   }
-}
+}, { immediate: true })
 
 function toggleMode() {
   isLogin.value = !isLogin.value
-  error.value = ''
 }
 </script>
 
 <template>
-  <UCard class="w-full max-w-md mx-4" :ui="{ body: 'p-8 sm:p-10' }">
+  <div class="w-full max-w-md mx-4">
     <!-- Header -->
     <div class="text-center mb-8">
       <img 
@@ -68,53 +39,41 @@ function toggleMode() {
       </p>
     </div>
 
-    <!-- Form -->
-    <form class="space-y-5" @submit.prevent="handleSubmit">
-      <UFormField v-if="!isLogin" label="Name">
-        <UInput
-          v-model="name"
-          type="text"
-          placeholder="Your name (optional)"
-        />
-      </UFormField>
-
-      <UFormField label="Email" required>
-        <UInput
-          v-model="email"
-          type="email"
-          placeholder="you@example.com"
-          required
-        />
-      </UFormField>
-
-      <UFormField label="Password" required :hint="!isLogin ? 'At least 8 characters' : undefined">
-        <UInput
-          v-model="password"
-          type="password"
-          placeholder="••••••••"
-          required
-        />
-      </UFormField>
-
-      <!-- Error -->
-      <UAlert
-        v-if="error"
-        color="error"
-        variant="subtle"
-        icon="i-lucide-alert-circle"
-        :title="error"
+    <!-- Clerk Sign In / Sign Up Component -->
+    <div class="clerk-container">
+      <SignIn 
+        v-if="isLogin"
+        :routing="'hash'"
+        :sign-up-url="'/auth'"
+        :appearance="{
+          elements: {
+            rootBox: 'w-full',
+            card: 'shadow-none border-0 bg-transparent',
+            headerTitle: 'hidden',
+            headerSubtitle: 'hidden',
+            socialButtonsBlockButton: 'border border-default hover:bg-elevated',
+            formButtonPrimary: 'bg-primary hover:bg-primary/90',
+            footerAction: 'hidden'
+          }
+        }"
       />
-
-      <UButton
-        type="submit"
-        size="lg"
-        block
-        :loading="loading"
-        :disabled="loading"
-      >
-        {{ isLogin ? 'Sign In' : 'Create Account' }}
-      </UButton>
-    </form>
+      <SignUp 
+        v-else
+        :routing="'hash'"
+        :sign-in-url="'/auth'"
+        :appearance="{
+          elements: {
+            rootBox: 'w-full',
+            card: 'shadow-none border-0 bg-transparent',
+            headerTitle: 'hidden',
+            headerSubtitle: 'hidden',
+            socialButtonsBlockButton: 'border border-default hover:bg-elevated',
+            formButtonPrimary: 'bg-primary hover:bg-primary/90',
+            footerAction: 'hidden'
+          }
+        }"
+      />
+    </div>
 
     <!-- Footer -->
     <div class="text-center mt-6 pt-6 border-t border-default text-sm text-dimmed">
@@ -128,5 +87,11 @@ function toggleMode() {
         {{ isLogin ? 'Sign up' : 'Sign in' }}
       </UButton>
     </div>
-  </UCard>
+  </div>
 </template>
+
+<style scoped>
+.clerk-container :deep(.cl-internal-b3fm6y) {
+  background: transparent;
+}
+</style>

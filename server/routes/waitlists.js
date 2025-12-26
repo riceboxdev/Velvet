@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { authenticateToken: verifyToken } = require('../middleware/auth');
+const { authenticateToken: verifyToken } = require('../middleware/clerk');
 const Waitlist = require('../models/Waitlist');
 const emailService = require('../services/email');
-const { getAuth } = require('firebase-admin/auth');
+const { clerkClient } = require('@clerk/express');
 
 // All routes require authentication
 router.use(verifyToken);
@@ -14,7 +14,7 @@ router.use(verifyToken);
  */
 router.get('/', async (req, res) => {
     try {
-        const waitlists = await Waitlist.findByUserId(req.auth.uid);
+        const waitlists = await Waitlist.findByUserId(req.auth.userId);
 
         // Get stats for each waitlist
         const waitlistsWithStats = await Promise.all(
@@ -53,7 +53,7 @@ router.post('/', async (req, res) => {
         const waitlist = await Waitlist.create({
             name,
             description: description || '',
-            userId: req.auth.uid
+            userId: req.auth.userId
         });
 
         const stats = await Waitlist.getStats(waitlist.id);
@@ -80,7 +80,7 @@ router.get('/:id', async (req, res) => {
             return res.status(404).json({ error: 'Waitlist not found' });
         }
 
-        if (waitlist.user_id !== req.auth.uid) {
+        if (waitlist.user_id !== req.auth.userId) {
             return res.status(403).json({ error: 'Access denied' });
         }
 
@@ -102,10 +102,6 @@ router.get('/:id', async (req, res) => {
  */
 const Subscription = require('../models/Subscription');
 
-// ... (existing imports)
-
-// ...
-
 /**
  * PUT /api/waitlists/:id
  * Update a waitlist
@@ -118,7 +114,7 @@ router.put('/:id', async (req, res) => {
             return res.status(404).json({ error: 'Waitlist not found' });
         }
 
-        if (waitlist.user_id !== req.auth.uid) {
+        if (waitlist.user_id !== req.auth.userId) {
             return res.status(403).json({ error: 'Access denied' });
         }
 
@@ -126,7 +122,7 @@ router.put('/:id', async (req, res) => {
 
         // Feature Gating Logic
         if (settings) {
-            const limits = await Subscription.getUserLimits(req.auth.uid);
+            const limits = await Subscription.getUserLimits(req.auth.userId);
             const features = limits.features || [];
 
             // Remove Branding
@@ -176,8 +172,6 @@ router.put('/:id', async (req, res) => {
 
             // Custom Offboarding Email
             if (settings.sendOffboardingEmail === true && !features.includes('custom_offboarding_email')) {
-                // If they just enable it but don't change content? 
-                // Plan says "Custom Offboarding Emails" is Pro. "Send Offboarding Email" might be the feature itself.
                 return res.status(403).json({
                     error: 'Feature restricted',
                     details: 'Upgrade required for offboarding emails',
@@ -211,7 +205,7 @@ router.delete('/:id', async (req, res) => {
             return res.status(404).json({ error: 'Waitlist not found' });
         }
 
-        if (waitlist.user_id !== req.auth.uid) {
+        if (waitlist.user_id !== req.auth.userId) {
             return res.status(403).json({ error: 'Access denied' });
         }
 
@@ -239,7 +233,7 @@ router.post('/:id/regenerate-key', async (req, res) => {
             return res.status(404).json({ error: 'Waitlist not found' });
         }
 
-        if (waitlist.user_id !== req.auth.uid) {
+        if (waitlist.user_id !== req.auth.userId) {
             return res.status(403).json({ error: 'Access denied' });
         }
 
@@ -267,7 +261,7 @@ router.post('/:id/regenerate-zapier-key', async (req, res) => {
             return res.status(404).json({ error: 'Waitlist not found' });
         }
 
-        if (waitlist.user_id !== req.auth.uid) {
+        if (waitlist.user_id !== req.auth.userId) {
             return res.status(403).json({ error: 'Access denied' });
         }
 
@@ -295,15 +289,13 @@ router.post('/:id/test-email', async (req, res) => {
             return res.status(404).json({ error: 'Waitlist not found' });
         }
 
-        if (waitlist.user_id !== req.auth.uid) {
+        if (waitlist.user_id !== req.auth.userId) {
             return res.status(403).json({ error: 'Access denied' });
         }
 
-        // Get user's email from Firebase Auth
-        const userRecord = await getAuth().getUser(req.auth.uid);
-
-        // Use test email address for testing
-        const email = 'test@riceboxai.com';
+        // Get user's email from Clerk
+        const clerkUser = await clerkClient.users.getUser(req.auth.userId);
+        const email = clerkUser.primaryEmailAddress?.emailAddress || 'test@riceboxai.com';
 
         if (!email) {
             return res.status(400).json({ error: 'User has no email address' });

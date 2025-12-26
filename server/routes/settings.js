@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { authenticateToken: verifyToken } = require('../middleware/auth');
+const { authenticateToken: verifyToken } = require('../middleware/clerk');
 const SystemSettings = require('../models/SystemSettings');
 const User = require('../models/User');
 

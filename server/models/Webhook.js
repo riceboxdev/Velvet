@@ -1,48 +1,70 @@
-const { db } = require('../config/database');
-const { FieldValue } = require('firebase-admin/firestore');
+const { supabase } = require('../config/supabase');
 const { nanoid } = require('nanoid');
 
-const COLLECTION = 'webhooks';
+const TABLE = 'webhooks';
 
 class Webhook {
     /**
      * Create a new webhook
      */
     static async create({ waitlistId, url, events = ['new_signup', 'offboarded'], secret = null }) {
-        const id = nanoid(20);
+        const id = `wh_${nanoid(20)}`;
         const webhookSecret = secret || `whsec_${nanoid(32)}`;
 
-        const webhookData = {
-            waitlist_id: waitlistId,
-            url,
-            events,
-            secret: webhookSecret,
-            is_active: true,
-            created_at: FieldValue.serverTimestamp()
-        };
+        const { data, error } = await supabase
+            .from(TABLE)
+            .insert({
+                id,
+                waitlist_id: waitlistId,
+                url,
+                events,
+                secret: webhookSecret,
+                is_active: true
+            })
+            .select()
+            .single();
 
-        await db.collection(COLLECTION).doc(id).set(webhookData);
-        return this.findById(id);
+        if (error) {
+            console.error('[Webhook.create] Error:', error);
+            throw error;
+        }
+
+        return data;
     }
 
     /**
      * Find webhook by ID
      */
     static async findById(id) {
-        const doc = await db.collection(COLLECTION).doc(id).get();
-        if (!doc.exists) return null;
-        return { id: doc.id, ...doc.data() };
+        const { data, error } = await supabase
+            .from(TABLE)
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error && error.code !== 'PGRST116') {
+            console.error('[Webhook.findById] Error:', error);
+            throw error;
+        }
+
+        return data;
     }
 
     /**
      * Find all webhooks for a waitlist
      */
     static async findByWaitlistId(waitlistId) {
-        const snapshot = await db.collection(COLLECTION)
-            .where('waitlist_id', '==', waitlistId)
-            .get();
+        const { data, error } = await supabase
+            .from(TABLE)
+            .select('*')
+            .eq('waitlist_id', waitlistId);
 
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        if (error) {
+            console.error('[Webhook.findByWaitlistId] Error:', error);
+            throw error;
+        }
+
+        return data || [];
     }
 
     /**
@@ -58,17 +80,39 @@ class Webhook {
             }
         }
 
-        if (Object.keys(updateData).length > 0) {
-            await db.collection(COLLECTION).doc(id).update(updateData);
+        if (Object.keys(updateData).length === 0) {
+            return this.findById(id);
         }
-        return this.findById(id);
+
+        const { data, error } = await supabase
+            .from(TABLE)
+            .update(updateData)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('[Webhook.update] Error:', error);
+            throw error;
+        }
+
+        return data;
     }
 
     /**
      * Delete webhook
      */
     static async delete(id) {
-        await db.collection(COLLECTION).doc(id).delete();
+        const { error } = await supabase
+            .from(TABLE)
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error('[Webhook.delete] Error:', error);
+            throw error;
+        }
+
         return true;
     }
 
@@ -76,14 +120,19 @@ class Webhook {
      * Get active webhooks for an event
      */
     static async getActiveForEvent(waitlistId, event) {
-        const snapshot = await db.collection(COLLECTION)
-            .where('waitlist_id', '==', waitlistId)
-            .where('is_active', '==', true)
-            .get();
+        const { data, error } = await supabase
+            .from(TABLE)
+            .select('*')
+            .eq('waitlist_id', waitlistId)
+            .eq('is_active', true)
+            .contains('events', [event]);
 
-        return snapshot.docs
-            .map(doc => ({ id: doc.id, ...doc.data() }))
-            .filter(webhook => webhook.events.includes(event));
+        if (error) {
+            console.error('[Webhook.getActiveForEvent] Error:', error);
+            throw error;
+        }
+
+        return data || [];
     }
 }
 

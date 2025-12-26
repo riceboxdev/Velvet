@@ -1,11 +1,6 @@
 import { defineStore } from 'pinia'
-import {
-    signInWithEmailAndPassword,
-    createUserWithEmailAndPassword,
-    signOut,
-    onAuthStateChanged,
-    type User as FirebaseUser
-} from 'firebase/auth'
+import { useClerk, useUser, useAuth } from 'vue-clerk'
+import { createClient } from '@supabase/supabase-js'
 
 interface SubscriptionLimits {
     max_waitlists: number | null
@@ -14,8 +9,6 @@ interface SubscriptionLimits {
     plan_name: string
     has_subscription: boolean
 }
-import { useFirebaseAuth, useFirebaseStorage } from '~/plugins/firebase.client'
-import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 
 interface User {
     id: string
@@ -35,31 +28,58 @@ export const useAuthStore = defineStore('auth', () => {
         return config.public.apiBase as string
     }
 
+    // Helper to get Supabase client
+    const getSupabaseClient = () => {
+        const config = useRuntimeConfig()
+        return createClient(
+            config.public.supabaseUrl as string,
+            config.public.supabaseAnonKey as string
+        )
+    }
+
     // State
     const user = ref<User | null>(null)
     const subscription = ref<SubscriptionLimits | null>(null)
-    const firebaseUser = ref<FirebaseUser | null>(null)
     const loading = ref(false)
     const error = ref<string | null>(null)
     const initialized = ref(false)
 
-    // Computed
-    const isAuthenticated = computed(() => !!firebaseUser.value && !!user.value)
+    // Clerk composables - only use on client
+    const getClerkAuth = () => {
+        if (import.meta.client) {
+            return useAuth()
+        }
+        return null
+    }
 
-    // Get ID token for API calls
-    async function getIdToken(): Promise<string | null> {
-        if (!firebaseUser.value) return null
+    const getClerkUser = () => {
+        if (import.meta.client) {
+            return useUser()
+        }
+        return null
+    }
+
+    // Computed
+    const isAuthenticated = computed(() => {
+        const clerkAuth = getClerkAuth()
+        return clerkAuth?.isSignedIn?.value && !!user.value
+    })
+
+    // Get session token for API calls
+    async function getSessionToken(): Promise<string | null> {
+        const clerkAuth = getClerkAuth()
+        if (!clerkAuth?.isSignedIn?.value) return null
         try {
-            return await firebaseUser.value.getIdToken()
+            return await clerkAuth.getToken() || null
         } catch (e) {
-            console.error('Failed to get ID token:', e)
+            console.error('Failed to get session token:', e)
             return null
         }
     }
 
     // Auth header computed - returns a promise
     async function getAuthHeader(): Promise<Record<string, string>> {
-        const token = await getIdToken()
+        const token = await getSessionToken()
         return token ? { Authorization: `Bearer ${token}` } : {}
     }
 
@@ -67,106 +87,66 @@ export const useAuthStore = defineStore('auth', () => {
     function initAuth() {
         if (typeof window === 'undefined') return
 
-        const auth = useFirebaseAuth()
-        if (!auth) return
+        const clerkAuth = getClerkAuth()
+        const clerkUser = getClerkUser()
 
-        onAuthStateChanged(auth, async (fbUser) => {
-            firebaseUser.value = fbUser
+        if (!clerkAuth || !clerkUser) return
 
-            if (fbUser) {
-                // Fetch or create user document
+        // Watch for auth state changes
+        watch(() => clerkAuth.isSignedIn?.value, async (isSignedIn) => {
+            if (isSignedIn && clerkUser.user?.value) {
                 await fetchCurrentUser()
             } else {
                 user.value = null
                 subscription.value = null
             }
-
             initialized.value = true
-        })
-    }
-
-    // Signup with email and password
-    async function signup(email: string, password: string, name = '') {
-        loading.value = true
-        error.value = null
-
-        try {
-            const auth = useFirebaseAuth()
-            if (!auth) throw new Error('Firebase not initialized')
-
-            const credential = await createUserWithEmailAndPassword(auth, email, password)
-            firebaseUser.value = credential.user
-
-            // Create user document in Firestore via API
-            const token = await credential.user.getIdToken()
-            const res = await fetch(`${getApiBase()}/auth/create-user`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify({ name })
-            })
-
-            const data = await res.json()
-
-            if (!res.ok) {
-                throw new Error(data.message || data.error || 'Failed to create user')
-            }
-
-            user.value = data.data.user
-            return user.value
-        } catch (e: any) {
-            error.value = e.message
-            throw e
-        } finally {
-            loading.value = false
-        }
-    }
-
-    // Login with email and password
-    async function login(email: string, password: string) {
-        loading.value = true
-        error.value = null
-
-        try {
-            const auth = useFirebaseAuth()
-            if (!auth) throw new Error('Firebase not initialized')
-
-            const credential = await signInWithEmailAndPassword(auth, email, password)
-            firebaseUser.value = credential.user
-
-            // Fetch user document
-            await fetchCurrentUser()
-
-            return user.value
-        } catch (e: any) {
-            // Map Firebase error codes to user-friendly messages
-            let message = e.message
-            if (e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password') {
-                message = 'Invalid email or password'
-            } else if (e.code === 'auth/too-many-requests') {
-                message = 'Too many failed attempts. Please try again later.'
-            }
-            error.value = message
-            throw new Error(message)
-        } finally {
-            loading.value = false
-        }
+        }, { immediate: true })
     }
 
     // Fetch current user from API
     async function fetchCurrentUser() {
-        if (!firebaseUser.value) return null
+        const clerkAuth = getClerkAuth()
+        const clerkUser = getClerkUser()
+
+        if (!clerkAuth?.isSignedIn?.value || !clerkUser?.user?.value) return null
 
         loading.value = true
         error.value = null
 
         try {
-            const token = await firebaseUser.value.getIdToken()
+            const token = await getSessionToken()
+            if (!token) {
+                user.value = null
+                return null
+            }
+
             const res = await fetch(`${getApiBase()}/auth/me`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
+
+            if (res.status === 404) {
+                // User doc doesn't exist, create it
+                const createRes = await fetch(`${getApiBase()}/auth/create-user`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        name: clerkUser.user.value.fullName || '',
+                        email: clerkUser.user.value.primaryEmailAddress?.emailAddress || ''
+                    })
+                })
+
+                if (!createRes.ok) {
+                    throw new Error('Failed to create user')
+                }
+
+                const createData = await createRes.json()
+                user.value = createData.data.user
+                return user.value
+            }
 
             if (!res.ok) {
                 user.value = null
@@ -189,22 +169,22 @@ export const useAuthStore = defineStore('auth', () => {
     // Logout
     async function logout() {
         try {
-            const auth = useFirebaseAuth()
-            if (auth) {
-                await signOut(auth)
+            const clerk = useClerk()
+            if (clerk) {
+                await clerk.signOut()
             }
         } catch (e) {
             console.error('Logout error:', e)
         }
-        firebaseUser.value = null
         user.value = null
+        subscription.value = null
     }
 
     // Update profile
     async function updateProfile(updates: { name?: string; email?: string; bio?: string; website?: string; company?: string; photo_url?: string }) {
-        if (!firebaseUser.value) throw new Error('Not authenticated')
+        const token = await getSessionToken()
+        if (!token) throw new Error('Not authenticated')
 
-        const token = await firebaseUser.value.getIdToken()
         const res = await fetch(`${getApiBase()}/auth/profile`, {
             method: 'PUT',
             headers: {
@@ -224,30 +204,38 @@ export const useAuthStore = defineStore('auth', () => {
         return user.value
     }
 
-    // Upload profile photo
+    // Upload profile photo to Supabase Storage
     async function uploadProfilePhoto(file: File) {
-        if (!firebaseUser.value) throw new Error('Not authenticated')
+        const clerkUser = getClerkUser()
+        if (!clerkUser?.user?.value) throw new Error('Not authenticated')
 
-        const storage = useFirebaseStorage()
-        if (!storage) throw new Error('Firebase Storage not initialized')
+        const supabase = getSupabaseClient()
+        const userId = clerkUser.user.value.id
 
         try {
-            const config = useRuntimeConfig()
             console.log('Starting upload...', {
-                uid: firebaseUser.value.uid,
-                storageBucket: config.public.firebaseStorageBucket,
+                userId,
                 fileName: file.name,
                 fileSize: file.size
             })
 
-            const fileRef = storageRef(storage, `users/${firebaseUser.value.uid}/avatar`)
+            const fileExt = file.name.split('.').pop()
+            const filePath = `avatars/${userId}/avatar.${fileExt}`
 
-            console.log('Uploading bytes...')
-            const snapshot = await uploadBytes(fileRef, file)
-            console.log('Upload complete, snapshot:', snapshot)
+            const { error: uploadError } = await supabase.storage
+                .from('avatars')
+                .upload(filePath, file, { upsert: true })
 
-            const photoUrl = await getDownloadURL(fileRef)
-            console.log('Got download URL:', photoUrl)
+            if (uploadError) {
+                throw uploadError
+            }
+
+            const { data: urlData } = supabase.storage
+                .from('avatars')
+                .getPublicUrl(filePath)
+
+            const photoUrl = urlData.publicUrl
+            console.log('Got public URL:', photoUrl)
 
             // Update user profile with new photo URL
             await updateProfile({ photo_url: photoUrl })
@@ -261,7 +249,6 @@ export const useAuthStore = defineStore('auth', () => {
 
     // Initialize on client
     if (import.meta.client) {
-        // Initialize auth immediately when store is created
         initAuth()
     }
 
@@ -269,7 +256,6 @@ export const useAuthStore = defineStore('auth', () => {
         // State
         user,
         subscription,
-        firebaseUser,
         loading,
         error,
         initialized,
@@ -278,13 +264,11 @@ export const useAuthStore = defineStore('auth', () => {
         isAuthenticated,
 
         // Actions
-        signup,
-        login,
         logout,
         fetchCurrentUser,
         updateProfile,
         uploadProfilePhoto,
-        getIdToken,
+        getSessionToken,
         getAuthHeader,
         initAuth
     }

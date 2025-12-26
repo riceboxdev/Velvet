@@ -4,6 +4,20 @@ const admin = require('firebase-admin');
 // Initialize Firebase Admin
 // Supports both raw JSON and base64-encoded service account
 let serviceAccount = null;
+// Fallback: if no env var provided, try loading the local service account JSON file
+if (!serviceAccount) {
+  try {
+    const path = require('path');
+    const fs = require('fs');
+    const localPath = path.resolve(__dirname, '../../velvet-fc372-firebase-adminsdk-fbsvc-c23cdb6bbd.json');
+    if (fs.existsSync(localPath)) {
+      serviceAccount = JSON.parse(fs.readFileSync(localPath, 'utf8'));
+      console.log('[Firebase] Loaded service account from local file');
+    }
+  } catch (e) {
+    console.error('[Firebase] Failed to load local service account file:', e.message);
+  }
+}
 
 try {
   if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
@@ -33,6 +47,7 @@ try {
 
 let db = null;
 let auth = null;
+
 
 try {
   if (serviceAccount) {

@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { ClerkLoaded, ClerkLoading } from 'vue-clerk'
+
 const colorMode = useColorMode()
+const config = useRuntimeConfig()
 
 const color = computed(() => colorMode.value === 'dark' ? '#1b1718' : 'white')
 
@@ -28,14 +31,33 @@ useSeoMeta({
   ogDescription: description,
   twitterCard: 'summary_large_image'
 })
+
+// Clerk publishable key
+const clerkPublishableKey = config.public.clerkPublishableKey as string
 </script>
 
 <template>
   <UApp>
     <NuxtLoadingIndicator />
 
-    <NuxtLayout>
-      <NuxtPage />
-    </NuxtLayout>
+    <!-- Clerk Provider wraps the entire app -->
+    <ClientOnly>
+      <ClerkLoading>
+        <div class="min-h-screen flex items-center justify-center">
+          <div class="animate-pulse text-muted">Loading...</div>
+        </div>
+      </ClerkLoading>
+      <ClerkLoaded>
+        <NuxtLayout>
+          <NuxtPage />
+        </NuxtLayout>
+      </ClerkLoaded>
+      
+      <template #fallback>
+        <div class="min-h-screen flex items-center justify-center">
+          <div class="animate-pulse text-muted">Loading...</div>
+        </div>
+      </template>
+    </ClientOnly>
   </UApp>
 </template>

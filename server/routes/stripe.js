@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const StripeService = require('../services/stripeService');
-const { authenticateToken } = require('../middleware/auth');
+const { authenticateToken } = require('../middleware/clerk');
 
 /**
  * POST /api/stripe/create-checkout-session

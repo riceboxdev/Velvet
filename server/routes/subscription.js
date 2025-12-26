@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Subscription = require('../models/Subscription');
-const { authenticateToken } = require('../middleware/auth');
+const { authenticateToken } = require('../middleware/clerk');
 
 /**
  * GET /api/subscription/plans

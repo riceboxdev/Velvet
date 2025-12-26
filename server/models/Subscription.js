@@ -1,9 +1,8 @@
-const { db } = require('../config/database');
-const { FieldValue } = require('firebase-admin/firestore');
+const { supabase } = require('../config/supabase');
 const { nanoid } = require('nanoid');
 
-const PLANS_COLLECTION = 'subscription_plans';
-const SUBSCRIPTIONS_COLLECTION = 'subscriptions';
+const PLANS_TABLE = 'subscription_plans';
+const SUBSCRIPTIONS_TABLE = 'subscriptions';
 
 class Subscription {
     // ==================== PLANS ====================
@@ -14,42 +13,66 @@ class Subscription {
     static async createPlan({ name, description = '', monthlyPrice = 0, annualPrice = 0, maxWaitlists = null, maxSignupsPerMonth = null, maxTeamMembers = 1, features = [], sortOrder = 0 }) {
         const id = nanoid(20);
 
-        const planData = {
-            name,
-            description,
-            monthly_price: monthlyPrice,
-            annual_price: annualPrice,
-            max_waitlists: maxWaitlists,
-            max_signups_per_month: maxSignupsPerMonth,
-            max_team_members: maxTeamMembers,
-            features,
-            is_active: true,
-            sort_order: sortOrder
-        };
+        const { data, error } = await supabase
+            .from(PLANS_TABLE)
+            .insert({
+                id,
+                name,
+                description,
+                monthly_price: monthlyPrice,
+                annual_price: annualPrice,
+                max_waitlists: maxWaitlists,
+                max_signups_per_month: maxSignupsPerMonth,
+                max_team_members: maxTeamMembers,
+                features,
+                is_active: true,
+                sort_order: sortOrder
+            })
+            .select()
+            .single();
 
-        await db.collection(PLANS_COLLECTION).doc(id).set(planData);
-        return this.findPlanById(id);
+        if (error) {
+            console.error('[Subscription.createPlan] Error:', error);
+            throw error;
+        }
+
+        return data;
     }
 
     /**
      * Find plan by ID
      */
     static async findPlanById(id) {
-        const doc = await db.collection(PLANS_COLLECTION).doc(id).get();
-        if (!doc.exists) return null;
-        return { id: doc.id, ...doc.data() };
+        const { data, error } = await supabase
+            .from(PLANS_TABLE)
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error && error.code !== 'PGRST116') {
+            console.error('[Subscription.findPlanById] Error:', error);
+            throw error;
+        }
+
+        return data;
     }
 
     /**
      * Get all active plans
      */
     static async getAllPlans() {
-        const snapshot = await db.collection(PLANS_COLLECTION)
-            .where('is_active', '==', true)
-            .orderBy('sort_order', 'asc')
-            .get();
+        const { data, error } = await supabase
+            .from(PLANS_TABLE)
+            .select('*')
+            .eq('is_active', true)
+            .order('sort_order', { ascending: true });
 
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        if (error) {
+            console.error('[Subscription.getAllPlans] Error:', error);
+            throw error;
+        }
+
+        return data || [];
     }
 
     // ==================== SUBSCRIPTIONS ====================
@@ -68,21 +91,27 @@ class Subscription {
             periodEnd.setMonth(periodEnd.getMonth() + 1);
         }
 
-        const subscriptionData = {
-            user_id: userId,
-            plan_id: planId,
-            billing_cycle: billingCycle,
-            status: 'active',
-            current_period_start: FieldValue.serverTimestamp(),
-            current_period_end: periodEnd,
-            created_at: FieldValue.serverTimestamp(),
-            updated_at: FieldValue.serverTimestamp(),
-            cancelled_at: null,
-            stripe_subscription_id: stripeSubscriptionId
-        };
+        const { data, error } = await supabase
+            .from(SUBSCRIPTIONS_TABLE)
+            .insert({
+                id,
+                user_id: userId,
+                plan_id: planId,
+                billing_cycle: billingCycle,
+                status: 'active',
+                current_period_start: now.toISOString(),
+                current_period_end: periodEnd.toISOString(),
+                stripe_subscription_id: stripeSubscriptionId
+            })
+            .select()
+            .single();
 
-        await db.collection(SUBSCRIPTIONS_COLLECTION).doc(id).set(subscriptionData);
-        return this.findSubscriptionById(id);
+        if (error) {
+            console.error('[Subscription.createSubscription] Error:', error);
+            throw error;
+        }
+
+        return data;
     }
 
     /**
@@ -101,46 +130,79 @@ class Subscription {
                 sanitizedUpdates[key] = updates[key];
             }
         }
-        sanitizedUpdates.updated_at = FieldValue.serverTimestamp();
 
-        await db.collection(SUBSCRIPTIONS_COLLECTION).doc(id).update(sanitizedUpdates);
-        return this.findSubscriptionById(id);
+        const { data, error } = await supabase
+            .from(SUBSCRIPTIONS_TABLE)
+            .update(sanitizedUpdates)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('[Subscription.update] Error:', error);
+            throw error;
+        }
+
+        return data;
     }
 
     /**
      * Find subscription by ID
      */
     static async findSubscriptionById(id) {
-        const doc = await db.collection(SUBSCRIPTIONS_COLLECTION).doc(id).get();
-        if (!doc.exists) return null;
-        return { id: doc.id, ...doc.data() };
+        const { data, error } = await supabase
+            .from(SUBSCRIPTIONS_TABLE)
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error && error.code !== 'PGRST116') {
+            console.error('[Subscription.findSubscriptionById] Error:', error);
+            throw error;
+        }
+
+        return data;
     }
 
     /**
      * Find active subscription for a user
      */
     static async findActiveByUserId(userId) {
-        const snapshot = await db.collection(SUBSCRIPTIONS_COLLECTION)
-            .where('user_id', '==', userId)
-            .where('status', '==', 'active')
-            .limit(1)
-            .get();
+        const { data, error } = await supabase
+            .from(SUBSCRIPTIONS_TABLE)
+            .select('*')
+            .eq('user_id', userId)
+            .eq('status', 'active')
+            .single();
 
-        if (snapshot.empty) return null;
-        const doc = snapshot.docs[0];
-        return { id: doc.id, ...doc.data() };
+        if (error && error.code !== 'PGRST116') {
+            console.error('[Subscription.findActiveByUserId] Error:', error);
+            throw error;
+        }
+
+        return data;
     }
 
     /**
      * Cancel subscription
      */
     static async cancel(id) {
-        await db.collection(SUBSCRIPTIONS_COLLECTION).doc(id).update({
-            status: 'cancelled',
-            cancelled_at: FieldValue.serverTimestamp(),
-            updated_at: FieldValue.serverTimestamp()
-        });
-        return this.findSubscriptionById(id);
+        const { data, error } = await supabase
+            .from(SUBSCRIPTIONS_TABLE)
+            .update({
+                status: 'cancelled',
+                cancelled_at: new Date().toISOString()
+            })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('[Subscription.cancel] Error:', error);
+            throw error;
+        }
+
+        return data;
     }
 
     /**
@@ -167,7 +229,7 @@ class Subscription {
     static async getUserLimits(userId) {
         const subscription = await this.getUserSubscription(userId);
 
-        if (!subscription) {
+        if (!subscription || !subscription.plan) {
             // Default Free Tier Limits
             return {
                 max_waitlists: 1,

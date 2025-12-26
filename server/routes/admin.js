@@ -5,7 +5,7 @@ const Signup = require('../models/Signup');
 const Webhook = require('../models/Webhook');
 const WebhookService = require('../services/webhook');
 const EmailService = require('../services/email');
-const { authenticateApiKey } = require('../middleware/auth');
+const { authenticateApiKey } = require('../middleware/clerk');
 
 // All admin routes require API key authentication
 router.use(authenticateApiKey);

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { authenticateToken: verifyToken, optionalAuth } = require('../middleware/auth');
+const { authenticateToken: verifyToken, optionalAuth } = require('../middleware/clerk');
 const Signup = require('../models/Signup');
 const Waitlist = require('../models/Waitlist');
 const emailService = require('../services/email');
@@ -224,7 +224,7 @@ router.get('/:waitlistId', verifyToken, async (req, res) => {
             return res.status(404).json({ error: 'Waitlist not found' });
         }
 
-        if (waitlist.user_id !== req.auth.uid) {
+        if (waitlist.user_id !== req.auth.userId) {
             return res.status(403).json({ error: 'Access denied' });
         }
 
@@ -267,7 +267,7 @@ router.put('/:id/verify', verifyToken, async (req, res) => {
         }
 
         const waitlist = await Waitlist.findById(signup.waitlist_id);
-        if (waitlist.user_id !== req.auth.uid) {
+        if (waitlist.user_id !== req.auth.userId) {
             return res.status(403).json({ error: 'Access denied' });
         }
 
@@ -295,7 +295,7 @@ router.put('/:id/offboard', verifyToken, async (req, res) => {
         }
 
         const waitlist = await Waitlist.findById(signup.waitlist_id);
-        if (waitlist.user_id !== req.auth.uid) {
+        if (waitlist.user_id !== req.auth.userId) {
             return res.status(403).json({ error: 'Access denied' });
         }
 
@@ -331,7 +331,7 @@ router.delete('/:id', verifyToken, async (req, res) => {
         }
 
         const waitlist = await Waitlist.findById(signup.waitlist_id);
-        if (waitlist.user_id !== req.auth.uid) {
+        if (waitlist.user_id !== req.auth.userId) {
             return res.status(403).json({ error: 'Access denied' });
         }
 
