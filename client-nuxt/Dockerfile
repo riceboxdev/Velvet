@@ -10,8 +10,9 @@ WORKDIR /app
 FROM base AS deps
 COPY package.json pnpm-lock.yaml ./
 
-# Install with native builds allowed
-RUN pnpm install --frozen-lockfile
+# Allow native module build scripts and install
+RUN echo "enable-scripts=true" > .npmrc && \
+    pnpm install --frozen-lockfile
 
 # ---- Build ----
 FROM base AS builder
