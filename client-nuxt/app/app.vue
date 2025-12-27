@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ClerkLoaded, ClerkLoading } from 'vue-clerk'
+import { ClerkLoaded, ClerkLoading } from '@clerk/vue'
 
 const colorMode = useColorMode()
 const config = useRuntimeConfig()

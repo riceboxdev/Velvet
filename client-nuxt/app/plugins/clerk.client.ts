@@ -1,4 +1,4 @@
-import { clerkPlugin } from 'vue-clerk'
+import { clerkPlugin } from '@clerk/vue'
 
 export default defineNuxtPlugin((nuxtApp) => {
     const config = useRuntimeConfig()

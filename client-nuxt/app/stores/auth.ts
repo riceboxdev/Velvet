@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { useClerk, useUser, useAuth } from 'vue-clerk'
+import { useClerk, useUser, useAuth } from '@clerk/vue'
 import { createClient } from '@supabase/supabase-js'
 
 interface SubscriptionLimits {
@@ -70,7 +70,8 @@ export const useAuthStore = defineStore('auth', () => {
         const clerkAuth = getClerkAuth()
         if (!clerkAuth?.isSignedIn?.value) return null
         try {
-            return await clerkAuth.getToken() || null
+            // @ts-ignore - getToken is a computed ref in @clerk/vue
+            return await clerkAuth.getToken.value() || null
         } catch (e) {
             console.error('Failed to get session token:', e)
             return null
@@ -170,8 +171,8 @@ export const useAuthStore = defineStore('auth', () => {
     async function logout() {
         try {
             const clerk = useClerk()
-            if (clerk) {
-                await clerk.signOut()
+            if (clerk?.value) {
+                await clerk.value.signOut()
             }
         } catch (e) {
             console.error('Logout error:', e)

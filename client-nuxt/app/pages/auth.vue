@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SignIn, SignUp, useAuth } from 'vue-clerk'
+import { SignIn, SignUp, useAuth } from '@clerk/vue'
 
 definePageMeta({
   layout: 'auth'

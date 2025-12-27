@@ -11,6 +11,7 @@
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
+    "@clerk/vue": "^1.17.6",
     "@iconify-json/lucide": "^1.2.82",
     "@iconify-json/simple-icons": "^1.2.63",
     "@nuxt/content": "^3.9.0",
@@ -25,7 +26,6 @@
     "date-fns": "^4.1.0",
     "nuxt": "^4.2.2",
     "pinia": "^3.0.4",
-    "vue-clerk": "^5.15.0",
     "zod": "^4.2.1"
   },
   "devDependencies": {
