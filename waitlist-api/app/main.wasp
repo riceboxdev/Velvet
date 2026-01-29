@@ -216,7 +216,7 @@ api paymentsWebhook {
   fn: import { paymentsWebhook } from "@src/payment/webhook",
   entities: [User],
   middlewareConfigFn: import { paymentsMiddlewareConfigFn } from "@src/payment/webhook",
-  httpRoute: (POST, "/payments-webhook")
+  httpRoute: (POST, "/api/payments-webhook")
 }
 //#endregion
 
@@ -341,6 +341,6 @@ query getWaitlist {
 api waitlistEntry {
   fn: import { submitWaitlistEntry } from "@src/waitlist/api",
   entities: [WaitlistEntry, IntegrationKey],
-  httpRoute: (POST, "/waitlist")
+  httpRoute: (POST, "/api/waitlist")
 }
 //#endregion

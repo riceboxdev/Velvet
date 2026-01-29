@@ -27,15 +27,34 @@ RUN wasp build
 # The second stage uses the built node app
 FROM node:22-alpine
 
+# Install Nginx
+RUN apk add --no-cache nginx
+
+# Create necessary directories
 WORKDIR /app
 
 # Copy the built app from the builder stage
-COPY --from=builder /app/.wasp/build .
+# Copy explicit folders to ensure structure is correct
+COPY --from=builder /app/.wasp/build/server ./server
+COPY --from=builder /app/.wasp/build/web-app ./web-app
 
-# Install production dependencies
+# Copy Nginx config
+COPY nginx.conf /etc/nginx/http.d/default.conf
+RUN mkdir -p /run/nginx
+
+# Copy start script
+COPY start.sh .
+RUN chmod +x start.sh
+
+# Install production dependencies for server
+WORKDIR /app/server
 RUN npm install --omit=dev
 
+# Expose port 3005 (Nginx)
 EXPOSE 3005
 
-ENV PORT=3005
-CMD ["npm", "start"]
+# Internal Node port (used by Nginx proxy)
+ENV PORT=3000
+
+# Start via script
+CMD ["/app/start.sh"]
