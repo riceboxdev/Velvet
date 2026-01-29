@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - Wasp_WEB_CLIENT_URL=${Wasp_WEB_CLIENT_URL}
+      - Wasp_SERVER_URL=${Wasp_SERVER_URL}
+    restart: always
