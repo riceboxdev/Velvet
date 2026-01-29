@@ -1,4 +1,4 @@
-FROM node:18 AS builder
+FROM node:22 AS builder
 
 # Install Wasp
 RUN curl -sSL https://get.wasp.sh/installer.sh | sh
@@ -22,7 +22,7 @@ COPY waitlist-api/app/public ./public
 RUN wasp build
 
 # The second stage uses the built node app
-FROM node:18-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 
