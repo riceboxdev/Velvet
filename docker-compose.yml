@@ -2,9 +2,9 @@ services:
   web:
     build: .
     ports:
-      - "3005:3000"
+      - "3005:3005"
     environment:
-      - PORT=3000
+      - PORT=3005
       - DATABASE_URL=${DATABASE_URL}
       - JWT_SECRET=${JWT_SECRET}
       - WASP_WEB_CLIENT_URL=${WASP_WEB_CLIENT_URL}
