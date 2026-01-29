@@ -28,7 +28,7 @@ RUN wasp build
 FROM node:22-alpine
 
 # Install Nginx
-RUN apk add --no-cache nginx
+RUN apk add --no-cache nginx openssl
 
 # Install Prisma globally (required for Wasp/Prisma runtime operations)
 RUN npm install -g prisma@5
