@@ -30,6 +30,9 @@ FROM node:22-alpine
 # Install Nginx
 RUN apk add --no-cache nginx
 
+# Install Prisma globally (required for Wasp/Prisma runtime operations)
+RUN npm install -g prisma
+
 # Create necessary directories
 WORKDIR /app
 
