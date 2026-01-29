@@ -22,5 +22,5 @@ services:
       args:
         - WASP_SERVER_URL=${WASP_SERVER_URL}
     ports:
-      - "80:80"
+      - "3005:80"
     restart: always
