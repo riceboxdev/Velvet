@@ -1,0 +1,47 @@
+FROM node:22 AS builder
+
+# Install Wasp
+RUN curl -sSL https://get.wasp.sh/installer.sh | sh
+ENV PATH="/root/.local/bin:$PATH"
+
+WORKDIR /app
+
+# Copy the Wasp app
+COPY waitlist-api/app/main.wasp .
+COPY waitlist-api/app/.wasproot .
+COPY waitlist-api/app/.waspignore .
+COPY waitlist-api/app/package.json .
+COPY waitlist-api/app/package-lock.json .
+COPY waitlist-api/app/schema.prisma .
+COPY waitlist-api/app/tsconfig.json .
+COPY waitlist-api/app/vite.config.ts .
+COPY waitlist-api/app/.env.server.example .env.server
+
+# Copy source code
+COPY waitlist-api/app/src ./src
+COPY waitlist-api/app/public ./public
+
+# Build the Wasp app
+RUN wasp build
+
+# The second stage uses the built node app
+FROM node:22-alpine
+
+# Install Prisma globally (required for Wasp/Prisma runtime operations)
+RUN npm install -g prisma@5
+
+WORKDIR /app
+
+# Copy the built server from the builder stage
+COPY --from=builder /app/.wasp/build/server ./server
+COPY --from=builder /app/.wasp/build/db ./db
+
+# Install production dependencies for server
+WORKDIR /app/server
+RUN npm install --omit=dev
+
+# Expose port (Internal 3001 as usually 3000 might be default, but we can stick to 3001 to distinguish)
+ENV PORT=3001
+EXPOSE 3001
+
+CMD ["npm", "run", "start-production"]

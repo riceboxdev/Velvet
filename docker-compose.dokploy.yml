@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  velvet-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    environment:
+      - PORT=3001
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - WASP_WEB_CLIENT_URL=${WASP_WEB_CLIENT_URL}
+      - WASP_SERVER_URL=${WASP_SERVER_URL}
+    ports:
+      - "3001:3001"
+    restart: always
+
+  velvet-client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+      args:
+        - WASP_SERVER_URL=${WASP_SERVER_URL}
+    ports:
+      - "80:80"
+    restart: always
