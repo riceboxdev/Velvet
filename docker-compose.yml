@@ -7,6 +7,6 @@ services:
       - PORT=3000
       - DATABASE_URL=${DATABASE_URL}
       - JWT_SECRET=${JWT_SECRET}
-      - Wasp_WEB_CLIENT_URL=${Wasp_WEB_CLIENT_URL}
-      - Wasp_SERVER_URL=${Wasp_SERVER_URL}
+      - WASP_WEB_CLIENT_URL=${WASP_WEB_CLIENT_URL}
+      - WASP_SERVER_URL=${WASP_SERVER_URL}
     restart: always
