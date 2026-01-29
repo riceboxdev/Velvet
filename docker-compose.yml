@@ -4,7 +4,7 @@ services:
     ports:
       - "3005:3005"
     environment:
-      - PORT=3005
+      - PORT=3000
       - DATABASE_URL=${DATABASE_URL}
       - JWT_SECRET=${JWT_SECRET}
       - WASP_WEB_CLIENT_URL=${WASP_WEB_CLIENT_URL}
