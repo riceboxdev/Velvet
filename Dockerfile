@@ -8,7 +8,10 @@ WORKDIR /app
 
 # Copy the Wasp app
 COPY waitlist-api/app/main.wasp .
+COPY waitlist-api/app/.wasproot .
+COPY waitlist-api/app/.waspignore .
 COPY waitlist-api/app/package.json .
+COPY waitlist-api/app/package-lock.json .
 COPY waitlist-api/app/schema.prisma .
 COPY waitlist-api/app/tsconfig.json .
 COPY waitlist-api/app/vite.config.ts .
