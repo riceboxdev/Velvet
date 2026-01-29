@@ -40,6 +40,7 @@ WORKDIR /app
 # Copy explicit folders to ensure structure is correct
 COPY --from=builder /app/.wasp/build/server ./server
 COPY --from=builder /app/.wasp/build/web-app ./web-app
+COPY --from=builder /app/.wasp/build/db ./db
 
 # Copy Nginx config
 COPY nginx.conf /etc/nginx/http.d/default.conf
